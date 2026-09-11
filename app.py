@@ -486,7 +486,7 @@ if prompt:
                 )
             )
 
-        with st.spinner("Procesando información institucional..."):
+with st.spinner("Procesando información institucional..."):
             response = client.models.generate_content(
                 model="gemini-3.6-flash",
                 contents=contents,
@@ -500,3 +500,6 @@ if prompt:
                     {"role": "assistant", "content": response.text}
                 )
                 st.rerun()
+
+    except Exception as e:
+        st.error(f"Error de comunicación con el servicio: {e}")
