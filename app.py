@@ -8,91 +8,133 @@ st.set_page_config(
     layout="centered"
 )
 
-# Inyección de estilos CSS personalizados (Azul, Dorado y Negro)
+# Estilos CSS personalizados: Azul Bebé, Azul Medio, Blanco y Texto Negro en Entradas
 st.markdown("""
     <style>
-    /* Fondo principal y tipografía general */
+    /* Fondo principal en Azul Bebé */
     .stApp {
-        background-color: #050B14;
-        color: #E2E8F0;
+        background-color: #EBF4FC;
+        color: #1E293B;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* Barra lateral */
+    /* Panel lateral izquierdo en Azul Medio */
     section[data-testid="stSidebar"] {
-        background-color: #02050A;
-        border-right: 1px solid #D4AF37;
+        background-color: #3B729F;
+        border-right: 1px solid #2C597D;
     }
 
-    /* Encabezados y títulos */
-    h1 {
-        color: #D4AF37 !important;
+    /* Textos del menú lateral en blanco */
+    section[data-testid="stSidebar"] *, 
+    section[data-testid="stSidebar"] h1, 
+    section[data-testid="stSidebar"] h2, 
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] label {
+        color: #FFFFFF !important;
+    }
+
+    /* Contenedor del encabezado superior */
+    .header-box {
+        background-color: #3B729F;
+        padding: 22px;
+        border-radius: 12px;
+        border-left: 6px solid #D4AF37;
+        box-shadow: 0 4px 12px rgba(59, 114, 159, 0.2);
+        margin-bottom: 24px;
+    }
+
+    /* Escrito superior en blanco */
+    .header-box h1 {
+        color: #FFFFFF !important;
+        margin: 0 !important;
+        font-size: 1.75rem !important;
         font-weight: 600 !important;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #1E3A8A;
-        padding-bottom: 10px;
-    }
-    
-    h2, h3, .stSidebar h2 {
-        color: #D4AF37 !important;
-        font-weight: 500 !important;
+        border: none !important;
+        padding: 0 !important;
     }
 
-    /* Subtítulos y texto secundario */
-    .stCaption {
-        color: #94A3B8 !important;
+    .header-box p {
+        color: #F0F7FF !important;
+        margin-top: 6px !important;
+        margin-bottom: 0 !important;
         font-size: 0.95rem !important;
     }
 
-    /* Botones principales */
+    /* Botón de la barra lateral */
     .stButton>button {
-        background-color: #0F172A;
-        color: #D4AF37;
-        border: 1px solid #D4AF37;
-        border-radius: 4px;
-        font-weight: 500;
-        transition: all 0.3s ease;
+        background-color: #FFFFFF !important;
+        color: #2C597D !important;
+        border: 1px solid #FFFFFF !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
         width: 100%;
     }
     
     .stButton>button:hover {
-        background-color: #D4AF37;
-        color: #050B14;
-        border-color: #D4AF37;
+        background-color: #D4AF37 !important;
+        color: #FFFFFF !important;
+        border-color: #D4AF37 !important;
     }
 
-    /* Campos de texto de entrada */
+    /* Campo de clave API (fondo blanco, texto negro) */
     .stTextInput>div>div>input {
-        background-color: #0F172A;
-        color: #FFFFFF;
-        border: 1px solid #1E3A8A;
-        border-radius: 4px;
+        background-color: #FFFFFF !important;
+        color: #000000 !important;
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 6px !important;
     }
 
-    .stTextInput>div>div>input:focus {
-        border-color: #D4AF37;
-        box-shadow: 0 0 5px rgba(212, 175, 55, 0.4);
+    /* Tarjetas de mensajes en el chat (blanco con sombra suave) */
+    [data-testid="stChatMessage"] {
+        background-color: #FFFFFF !important;
+        border: 1px solid #DCE7F3 !important;
+        border-left: 5px solid #3B729F !important;
+        border-radius: 10px !important;
+        padding: 16px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
     }
 
-    /* Cuadro de chat del usuario y asistente */
-    .stChatMessage {
-        background-color: #0F172A;
-        border: 1px solid #1E3A8A;
-        border-radius: 6px;
-        margin-bottom: 12px;
+    /* Texto interno de los mensajes en negro/gris oscuro */
+    [data-testid="stChatMessage"] p, 
+    [data-testid="stChatMessage"] div,
+    [data-testid="stChatMessage"] span {
+        color: #0F172A !important;
+        font-size: 0.98rem;
+        line-height: 1.6;
     }
 
-    /* Ajustes del separador horizontal */
+    /* Campo inferior de entrada de texto (fondo blanco, texto negro) */
+    [data-testid="stChatInput"] {
+        background-color: #FFFFFF !important;
+        border: 2px solid #3B729F !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    [data-testid="stChatInput"] textarea {
+        color: #000000 !important;
+        background-color: #FFFFFF !important;
+    }
+
+    /* Separadores horizontales */
     hr {
-        border-color: #1E3A8A;
+        border-color: #538BB8;
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Sistema Digital de Llamados de Atención y Convivencia Escolar")
-st.caption("Institución Educativa Técnica Sagrado Corazón INTESAC de Soledad — Proyecto SENA")
+# Encabezado superior personalizado con escrito en blanco
+st.markdown("""
+    <div class="header-box">
+        <h1>Sistema Digital de Llamados de Atención y Convivencia Escolar</h1>
+        <p>Institución Educativa Técnica Sagrado Corazón INTESAC de Soledad — Proyecto SENA</p>
+    </div>
+""", unsafe_allow_html=True)
 
-# Barra lateral de configuración
+# Barra lateral izquierda (Azul Medio)
 with st.sidebar:
     st.header("Configuración del Sistema")
     api_key = st.text_input("Clave API de Gemini", type="password")
@@ -107,30 +149,30 @@ with st.sidebar:
         st.session_state.messages = []
         st.rerun()
 
-# Configuración del prompt de sistema
+# Prompt de sistema institucional
 SYSTEM_PROMPT = """
-Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón INTESAC de Soledad[span_0](start_span)[span_0](end_span).
+Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
 
-Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Ley 1620 de 2013, el Decreto 1965 de 2013 y la garantía del debido proceso (Artículo 29 de la Constitución Política)[span_1](start_span)[span_1](end_span).
+Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Ley 1620 de 2013, el Decreto 1965 de 2013 y la garantía del debido proceso (Artículo 29 de la Constitución Política).
 
 Importante: Bajo ninguna circunstancia utilices emojis, emoticones ni símbolos gráficos decorativos en tus respuestas. Mantén un formato sobrio, formal y estructurado.
 
 Ante cada caso expuesto por el usuario:
 1. Resumen de la situación: Presenta una síntesis objetiva de los hechos reportados.
-2. Clasificación de la falta (Según el Manual de Convivencia de INTESAC)[span_2](start_span)[span_2](end_span):
-   - Situación Tipo I (Leve): Conflictos manejados inadecuadamente o faltas menores a los deberes[span_3](start_span)[span_3](end_span).
-   - Situación Tipo II (Grave): Situaciones de acoso escolar (bullying), ciberacoso o agresiones físicas/verbales sin incapacidad médica[span_4](start_span)[span_4](end_span).
-   - Situación Tipo III (Gravísima): Presuntos delitos penales, agresiones físicas con incapacidad o porte de elementos prohibidos[span_5](start_span)[span_5](end_span).
-3. Procedimiento institucional: Detalla el protocolo a aplicar según el nivel de falta (llamado de atención verbal, registro en el observador, citación a acudientes o remisión al Comité de Convivencia)[span_6](start_span)[span_6](end_span).
-4. Garantías y Debido Proceso: Indica los derechos del estudiante (derecho a ser escuchado, presunción de inocencia, presentación de pruebas y descargos)[span_7](start_span)[span_7](end_span).
+2. Clasificación de la falta (Según el Manual de Convivencia de INTESAC):
+   - Situación Tipo I (Leve): Conflictos manejados inadecuadamente o faltas menores a los deberes.
+   - Situación Tipo II (Grave): Situaciones de acoso escolar (bullying), ciberacoso o agresiones físicas/verbales sin incapacidad médica.
+   - Situación Tipo III (Gravísima): Presuntos delitos penales, agresiones físicas con incapacidad o porte de elementos prohibidos.
+3. Procedimiento institucional: Detalla el protocolo a aplicar según el nivel de falta (llamado de atención verbal, registro en el observador, citación a acudientes o remisión al Comité de Convivencia).
+4. Garantías y Debido Proceso: Indica los derechos del estudiante (derecho a ser escuchado, presunción de inocencia, presentación de pruebas y descargos).
 5. Modelo de Carta de Descargos: Redacta una plantilla formal de descargos dirigida a la Coordinación o Rectoría de INTESAC.
 """
 
-# Inicialización del historial
+# Inicialización del historial de mensajes
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Despliegue de mensajes en el chat
+# Despliegue de mensajes
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
@@ -161,7 +203,7 @@ if user_input := st.chat_input("Escriba aquí los hechos de la situación a eval
         with st.chat_message("assistant"):
             with st.spinner("Procesando información institucional..."):
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-1.5-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=SYSTEM_PROMPT,
