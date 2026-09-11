@@ -210,7 +210,7 @@ if user_input := st.chat_input("Escriba aquí los hechos de la situación a eval
                 for attempt in range(max_retries):
                     try:
                         response = client.models.generate_content(
-                            model="gemini-2.5-flash",
+                            model="gemini-3.6-flash",
                             contents=contents,
                             config=types.GenerateContentConfig(
                                 system_instruction=SYSTEM_PROMPT,
