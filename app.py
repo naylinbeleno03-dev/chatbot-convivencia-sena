@@ -144,7 +144,7 @@ st.markdown("""
 # Encabezado superior
 st.markdown("""
     <div class="header-box">
-        <h1>Sistema Digital de Llamados de Atención y Convivencia Escolar</h1>
+        <h1>Sistema Integral de Convivencia Escolar</h1>
         <p>Institución Educativa Técnica Sagrado Corazón de Soledad</p>
     </div>
 """, unsafe_allow_html=True)
