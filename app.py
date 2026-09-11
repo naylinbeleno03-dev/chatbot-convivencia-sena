@@ -486,7 +486,7 @@ if prompt:
                 )
             )
 
-with st.spinner("Procesando información institucional..."):
+        with st.spinner("Procesando información institucional..."):
             response = client.models.generate_content(
                 model="gemini-3.6-flash",
                 contents=contents,
