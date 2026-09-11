@@ -1,8 +1,0 @@
-# Usando el archivo local descargado en tu proyecto
-st.image("escudo.png", width=150)
-
-# O usando la URL con formato de imagen directa de Google Drive
-st.image(
-    "https://lh3.googleusercontent.com/d/13yYEBZ1R04FjuV1P2MuFRH0ZvJmgDBkh",
-    width=150,
-)
