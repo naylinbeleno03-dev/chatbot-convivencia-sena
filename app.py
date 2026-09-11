@@ -221,7 +221,7 @@ if user_input := st.chat_input("Escriba aquí los hechos de la situación a eval
                     parts=[types.Part.from_text(text=m["content"])]
                 )
             )
-         with st.chat_message("assistant"):
+       with st.chat_message("assistant"):
             with st.spinner("Procesando información institucional..."):
                 response = client.models.generate_content(
                     model="gemini-3.6-flash",
@@ -229,11 +229,11 @@ if user_input := st.chat_input("Escriba aquí los hechos de la situación a eval
                     config=types.GenerateContentConfig(
                         system_instruction=SYSTEM_PROMPT,
                         temperature=0.2
-                            )
-                        )
-                        if response and response.text:
+                    )
+                )
+                if response and response.text:
                     st.markdown(response.text)
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
 
     except Exception as e:
-        st.error(f"Error de comunicación con el servicio: {e}") 
+        st.error(f"Error de comunicación con el servicio: {e}")
