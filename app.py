@@ -1,5 +1,6 @@
 import io
 import os
+import re
 import time
 import streamlit as st
 from google import genai
@@ -19,16 +20,20 @@ except ImportError:
 # ENLACES NORMATIVOS
 # ==============================================================================
 URL_CONSTITUCION_POLITICA = "https://www.registraduria.gov.co/IMG/pdf/constitucio-politica-colombia-1991.pdf"
-URL_LEY_115 = "https://www.mineducacion.gov.co/1621/articles-85906_archivo_pdf.pdf"
-URL_LEY_1098 = "https://www.icbf.gov.co/sites/default/files/codigoinfancialey1098.pdf"
+URL_LEY_115 = (
+    "https://www.mineducacion.gov.co/1621/articles-85906_archivo_pdf.pdf"
+)
+URL_LEY_1098 = (
+    "https://www.icbf.gov.co/sites/default/files/codigoinfancialey1098.pdf"
+)
 URL_LEY_1620 = "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=52287"
 URL_DECRETO_1965 = "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=54537"
-URL_MANUAL_INTESAC = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing"
+URL_MANUAL_CONVIVENCIA = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing"
 # ==============================================================================
 
 # Configuración inicial de la página
 st.set_page_config(
-    page_title="Sistema Integral de Convivencia Escolar - INTESAC",
+    page_title="Sistema Integral de Convivencia Escolar - Institución Educativa Técnica Sagrado Corazón",
     layout="centered",
 )
 
@@ -103,7 +108,7 @@ st.markdown(
     .header-box h1 {
         color: #FFFFFF !important;
         margin: 0 !important;
-        font-size: 1.75rem !important;
+        font-size: 1.65rem !important;
         font-weight: 600 !important;
     }
 
@@ -221,7 +226,7 @@ st.markdown(
     """
     <div class="header-box">
         <h1>Sistema Integral de Convivencia Escolar</h1>
-        <p>Institución Educativa Técnica Sagrado Corazón de Soledad</p>
+        <p>Institución Educativa Técnica Sagrado Corazón</p>
     </div>
 """,
     unsafe_allow_html=True,
@@ -231,81 +236,120 @@ st.markdown(
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
 
-# Función para generar archivo de Microsoft Word (.docx) con encabezado oficial e imagen
+def limpiar_texto_para_word(texto: str) -> str:
+    """Limpia guiones, viñetas, caracteres de markdown y líneas divisorias."""
+    if not texto:
+        return ""
+    # Eliminar líneas divisorias (---, ***)
+    texto = re.sub(r"^[-\*_]{3,}\s*$", "", texto, flags=re.MULTILINE)
+    # Eliminar guiones o asteriscos de inicio de línea (viñetas)
+    texto = re.sub(r"^\s*[-\*]\s+", "", texto, flags=re.MULTILINE)
+    # Eliminar guiones dobles
+    texto = re.sub(r"-{2,}", "", texto)
+    return texto.strip()
+
+
+# Función para generar archivo de Microsoft Word (.docx) formal
 def generar_documento_word(texto_contenido):
     doc = Document()
 
-    # Configurar márgenes de 1 pulgada
+    # Configuración de página y secciones
     for section in doc.sections:
-        section.top_margin = Inches(1)
-        section.bottom_margin = Inches(1)
+        section.top_margin = Inches(0.8)
+        section.bottom_margin = Inches(0.8)
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-    # 1. Buscar e insertar automáticamente el Escudo de INTESAC
-    posibles_nombres_imagen = [
-        "escudo.png",
-        "escudo.jpg",
-        "escudo_intesac.png",
-        "escudo_intesac.jpg",
-        "logo.png",
-        "logo.jpg",
-    ]
-    imagen_encontrada = None
-    for nombre in posibles_nombres_imagen:
-        if os.path.exists(nombre):
-            imagen_encontrada = nombre
-            break
+        # 1. ENCABEZADO (Esquina superior derecha, pequeño)
+        header = section.header
+        p_head = header.paragraphs[0]
+        p_head.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        p_head.paragraph_format.space_after = Pt(0)
 
-    if imagen_encontrada:
-        p_logo = doc.add_paragraph()
-        p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p_logo.paragraph_format.space_after = Pt(6)
-        run_logo = p_logo.add_run()
-        run_logo.add_picture(imagen_encontrada, width=Inches(1.2))
+        # Imagen pequeña en el encabezado si existe en el directorio
+        posibles_nombres_imagen = [
+            "escudo.png",
+            "escudo.jpg",
+            "escudo_intesac.png",
+            "escudo_intesac.jpg",
+            "logo.png",
+            "logo.jpg",
+        ]
+        imagen_encontrada = None
+        for nombre in posibles_nombres_imagen:
+            if os.path.exists(nombre):
+                imagen_encontrada = nombre
+                break
 
-    # 2. Encabezado Institucional
-    p_header = doc.add_paragraph()
-    p_header.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r1 = p_header.add_run(
-        "INSTITUCIÓN EDUCATIVA TÉCNICA SAGRADO CORAZÓN - INTESAC\n"
-    )
-    r1.bold = True
-    r1.font.size = Pt(12)
-    r1.font.name = "Arial"
-    r1.font.color.rgb = RGBColor(15, 23, 42)
+        if imagen_encontrada:
+            r_img = p_head.add_run()
+            r_img.add_picture(imagen_encontrada, width=Inches(0.55))
+            p_head.add_run("\n")
 
-    r2 = p_header.add_run(
-        "SISTEMA DIGITAL DE LLAMADOS DE ATENCIÓN Y SEGUIMIENTO DE"
-        " CONVIVENCIA\n"
-    )
-    r2.bold = True
-    r2.font.size = Pt(10)
-    r2.font.name = "Arial"
+        r_head = p_head.add_run(
+            "INSTITUCIÓN EDUCATIVA TÉCNICA SAGRADO CORAZÓN\nSistema Digital"
+            " de Seguimiento y Convivencia"
+        )
+        r_head.font.size = Pt(8)
+        r_head.font.name = "Arial"
+        r_head.font.bold = True
+        r_head.font.color.rgb = RGBColor(100, 116, 139)
 
-    r3 = p_header.add_run("Soledad - Atlántico\n")
-    r3.font.size = Pt(9)
-    r3.font.italic = True
-    r3.font.name = "Arial"
+        # 2. PIE DE PÁGINA
+        footer = section.footer
+        p_foot = footer.paragraphs[0]
+        p_foot.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r_foot = p_foot.add_run(
+            "Institución Educativa Técnica Sagrado Corazón — Soledad, Atlántico"
+        )
+        r_foot.font.size = Pt(8.5)
+        r_foot.font.name = "Arial"
+        r_foot.font.italic = True
+        r_foot.font.color.rgb = RGBColor(100, 116, 139)
 
-    p_line = doc.add_paragraph()
-    p_line.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_line.add_run(
-        "_________________________________________________________________________________"
-    )
-
-    doc.add_paragraph()
-
-    # 3. Formatear y añadir cuerpo del documento limpiando markdown
+    # 3. CUERPO DEL DOCUMENTO
     lineas = texto_contenido.split("\n")
     for linea in lineas:
-        if linea.strip():
-            texto_limpio = (
-                linea.replace("**", "").replace("* ", "• ").replace("#", "")
+        linea_limpia = limpiar_texto_para_word(linea)
+        if not linea_limpia:
+            continue
+
+        p = doc.add_paragraph()
+        p.paragraph_format.space_after = Pt(4)
+        p.paragraph_format.line_spacing = 1.15
+
+        # Detectar si la línea es un título o subtítulo
+        if (
+            linea.strip().startswith("#")
+            or (
+                linea.strip().startswith("**")
+                and linea.strip().endswith("**")
             )
-            p = doc.add_paragraph(texto_limpio)
-            p.paragraph_format.space_after = Pt(4)
-            p.paragraph_format.line_spacing = 1.15
+            or "MODELO" in linea.upper()
+            or "CARTA" in linea.upper()
+            or "DESCARGOS" in linea.upper()
+        ):
+
+            texto_titulo = linea_limpia.replace("#", "").replace("**", "")
+            run = p.add_run(texto_titulo)
+            run.bold = True
+            run.font.size = Pt(11)
+            run.font.name = "Arial"
+            run.font.color.rgb = RGBColor(15, 23, 42)
+            p.paragraph_format.space_before = Pt(6)
+        else:
+            # Separar fragmentos con negritas implícitas (**texto**)
+            partes = re.split(r"(\*\*.*?\*\*)", linea_limpia)
+            for parte in partes:
+                if parte.startswith("**") and parte.endswith("**"):
+                    run = p.add_run(parte[2:-2])
+                    run.bold = True
+                else:
+                    run = p.add_run(parte)
+
+                run.font.size = Pt(10)
+                run.font.name = "Arial"
+                run.font.color.rgb = RGBColor(31, 41, 55)
 
     # Guardar archivo en memoria
     buffer = io.BytesIO()
@@ -334,32 +378,40 @@ with st.sidebar:
     # Consulta de Marco Legal e Institucional con ENLACES DIRECTOS
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
-            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Debido Proceso y Derechos Fundamentales)."
+            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art."
+            " 29 (Debido Proceso y Derechos Fundamentales)."
         )
         st.markdown(
-            f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de Educación."
+            f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de"
+            " Educación."
         )
         st.markdown(
-            f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Código de la Infancia y la Adolescencia."
+            f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Código de la Infancia"
+            " y la Adolescencia."
         )
         st.markdown(
-            f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Sistema Nacional de Convivencia Escolar."
+            f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Sistema Nacional de"
+            " Convivencia Escolar."
         )
         st.markdown(
-            f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Reglamentación de la Ley 1620."
+            f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Reglamentación"
+            " de la Ley 1620."
         )
         st.markdown(
-            f"* **[Manual INTESAC]({URL_MANUAL_INTESAC})**: Manual de Convivencia Institucional."
+            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Manual"
+            " Institucional de Convivencia."
         )
 
     st.markdown("---")
     st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación acontecida.")
     st.markdown(
-        "2. El sistema categorizará el hecho de acuerdo con el marco legal colombiano y el Manual de Convivencia de INTESAC."
+        "2. El sistema categorizará el hecho de acuerdo con el marco legal"
+        " colombiano y el Manual de Convivencia."
     )
     st.markdown(
-        "3. Se estructurará el procedimiento a seguir y la plantilla institucional para Microsoft Word."
+        "3. Se estructurará el procedimiento a seguir y la plantilla"
+        " institucional para Microsoft Word."
     )
 
     if st.button("Reiniciar consulta"):
@@ -368,32 +420,34 @@ with st.sidebar:
 
 # Prompt de sistema institucional
 SYSTEM_PROMPT = f"""
-Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón INTESAC de Soledad.
+Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
 
 Estás orientando a un usuario con el perfil de: {user_role}.
 
-Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de INTESAC.
+Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de la Institución Educativa Técnica Sagrado Corazón.
 
 Instrucciones estrictamente obligatorias de formato y contenido:
-- Bajo ninguna circunstancia utilices emojis, emoticones ni símbolos gráficos decorativos en tus respuestas. Mantén un formato totalmente sobrio, formal, profesional y estructurado.
+- Bajo ninguna circunstancia utilices emojis, emoticones, viñetas con guiones ni símbolos gráficos decorativos. Mantén un formato totalmente sobrio, formal, profesional y estructurado con títulos y subtítulos claros en negrita.
+- NO utilices guiones ni asteriscos al inicio de párrafo. Redacta párrafos completos e integrales.
 - NO solicites ni incluyas campos de teléfono de contacto ni correo electrónico en las plantillas o modelos de documentos.
-- Indica explícitamente en la sección del documento que la plantilla generada incluye el membrete de INTESAC para ser guardada en Microsoft Word e imprimir formalmente.
+- Utiliza campos de subrayado limpio (ejemplo: ______________________) para la información editable por parte del estudiante o acudiente.
+- Indica explícitamente en la sección del documento que la plantilla generada incluye el membrete de la Institución Educativa Técnica Sagrado Corazón para ser guardada en Microsoft Word e imprimir formalmente.
 
 Ante cada caso expuesto por el usuario:
 1. Resumen de la situación: Presenta una síntesis objetiva de los hechos reportados.
-2. Clasificación de la falta (Según el Manual de Convivencia de INTESAC y Ley 1620 de 2013):
+2. Clasificación de la falta (Según el Manual de Convivencia y Ley 1620 de 2013):
    - Situación Tipo I (Leve): Conflictos manejados inadecuadamente o faltas menores a los deberes (incluye presentación personal, exceso de maquillaje, corte de cabello no acorde al manual, uso de accesorios no permitidos, impuntualidad, fraude menor, desacato leve).
    - Situación Tipo II (Grave): Situaciones de acoso escolar (bullying), ciberacoso, agresiones físicas/verbales sin incapacidad médica o porte de elementos no autorizados como vapeadores.
    - Situación Tipo III (Gravísima): Presuntos delitos penales, agresiones físicas con incapacidad, porte de armas u objetos peligrosos.
 3. Procedimiento institucional: Detalla el protocolo a aplicar según el nivel de falta (llamado de atención verbal, registro en el observador, citación a acudientes o remisión al Comité de Convivencia).
 4. Garantías y Debido Proceso: Indica los derechos aplicables protegidos por el Artículo 29 de la Constitución Política y el Código de Infancia y Adolescencia (derecho a ser escuchado, presunción de inocencia, presentación de pruebas y descargos).
 5. Documento / Plantilla Sugerida (Para Microsoft Word):
-   - Si el perfil es Estudiante o Acudiente: Redacta un Modelo de Carta de Descargos dirigido a la Coordinación o Rectoría de INTESAC (omitiendo teléfono y correo electrónico).
-   - Si el perfil es Docente / Directivo: Redacta un Modelo de Registro en el Observador de Convivencia / Citación a Acudiente (omitiendo teléfono y correo electrónico).
+   - Si el perfil es Estudiante o Acudiente: Redacta un Modelo de Carta de Descargos Estudiantil dirigido a la Coordinación o Rectoría (omitiendo teléfono y correo electrónico) adaptado con subrayados (______________) para ser diligenciado.
+   - Si el perfil es Docente / Directivo: Redacta un Modelo de Registro en el Observador de Convivencia / Citación a Acudiente (omitiendo teléfono y correo electrónico) adaptado con subrayados (______________).
 """
 
 WELCOME_MESSAGE = f"""
-Saludos. Bienvenido al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de INTESAC.
+Saludos. Bienvenido al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón.
 
 Sesión iniciada como: **{user_role}**.
 
@@ -420,7 +474,7 @@ for idx, msg in enumerate(st.session_state.messages):
                 st.download_button(
                     label="📄 Descargar Documento Oficial en Microsoft Word (.docx)",
                     data=docx_file,
-                    file_name=f"Documento_Convivencia_INTESAC_{idx}.docx",
+                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     key=f"dl_word_{idx}",
                 )
@@ -428,7 +482,7 @@ for idx, msg in enumerate(st.session_state.messages):
                 st.download_button(
                     label="📄 Guardar texto (.txt)",
                     data=msg["content"],
-                    file_name=f"Documento_Convivencia_INTESAC_{idx}.txt",
+                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
                     mime="text/plain",
                     key=f"dl_txt_{idx}",
                 )
