@@ -1,4 +1,5 @@
 import io
+import os
 import time
 import streamlit as st
 from google import genai
@@ -230,25 +231,47 @@ st.markdown(
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
 
-# Función para generar archivo de Microsoft Word (.docx) con encabezado oficial
+# Función para generar archivo de Microsoft Word (.docx) con encabezado oficial e imagen
 def generar_documento_word(texto_contenido):
     doc = Document()
 
-    # Configurar márgenes
+    # Configurar márgenes de 1 pulgada
     for section in doc.sections:
         section.top_margin = Inches(1)
         section.bottom_margin = Inches(1)
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-    # Encabezado Institucional
+    # 1. Buscar e insertar automáticamente el Escudo de INTESAC
+    posibles_nombres_imagen = [
+        "escudo.png",
+        "escudo.jpg",
+        "escudo_intesac.png",
+        "escudo_intesac.jpg",
+        "logo.png",
+        "logo.jpg",
+    ]
+    imagen_encontrada = None
+    for nombre in posibles_nombres_imagen:
+        if os.path.exists(nombre):
+            imagen_encontrada = nombre
+            break
+
+    if imagen_encontrada:
+        p_logo = doc.add_paragraph()
+        p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_logo.paragraph_format.space_after = Pt(6)
+        run_logo = p_logo.add_run()
+        run_logo.add_picture(imagen_encontrada, width=Inches(1.2))
+
+    # 2. Encabezado Institucional
     p_header = doc.add_paragraph()
     p_header.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r1 = p_header.add_run(
         "INSTITUCIÓN EDUCATIVA TÉCNICA SAGRADO CORAZÓN - INTESAC\n"
     )
     r1.bold = True
-    r1.font.size = Pt(13)
+    r1.font.size = Pt(12)
     r1.font.name = "Arial"
     r1.font.color.rgb = RGBColor(15, 23, 42)
 
@@ -260,33 +283,31 @@ def generar_documento_word(texto_contenido):
     r2.font.size = Pt(10)
     r2.font.name = "Arial"
 
-    r3 = p_header.add_run("Soledad - Atlántico | DANE / NIT Institucional\n")
+    r3 = p_header.add_run("Soledad - Atlántico\n")
     r3.font.size = Pt(9)
     r3.font.italic = True
     r3.font.name = "Arial"
 
-    p_logo_note = doc.add_paragraph()
-    p_logo_note.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r_logo = p_logo_note.add_run(
-        "[ INSERTAR AQUÍ EL ESCUDO / LOGO INSTITUCIONAL DE INTESAC ]\n"
-    )
-    r_logo.font.size = Pt(8)
-    r_logo.font.color.rgb = RGBColor(100, 116, 139)
-
-    doc.add_paragraph(
+    p_line = doc.add_paragraph()
+    p_line.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_line.add_run(
         "_________________________________________________________________________________"
     )
+
     doc.add_paragraph()
 
-    # Cuerpo del documento
+    # 3. Formatear y añadir cuerpo del documento limpiando markdown
     lineas = texto_contenido.split("\n")
     for linea in lineas:
         if linea.strip():
-            p = doc.add_paragraph(linea)
+            texto_limpio = (
+                linea.replace("**", "").replace("* ", "• ").replace("#", "")
+            )
+            p = doc.add_paragraph(texto_limpio)
             p.paragraph_format.space_after = Pt(4)
             p.paragraph_format.line_spacing = 1.15
 
-    # Guardar en memoria
+    # Guardar archivo en memoria
     buffer = io.BytesIO()
     doc.save(buffer)
     buffer.seek(0)
@@ -353,7 +374,7 @@ Estás orientando a un usuario con el perfil de: {user_role}.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de INTESAC.
 
-Instrucciones strictly obligatorias de formato y contenido:
+Instrucciones estrictamente obligatorias de formato y contenido:
 - Bajo ninguna circunstancia utilices emojis, emoticones ni símbolos gráficos decorativos en tus respuestas. Mantén un formato totalmente sobrio, formal, profesional y estructurado.
 - NO solicites ni incluyas campos de teléfono de contacto ni correo electrónico en las plantillas o modelos de documentos.
 - Indica explícitamente en la sección del documento que la plantilla generada incluye el membrete de INTESAC para ser guardada en Microsoft Word e imprimir formalmente.
@@ -371,7 +392,6 @@ Ante cada caso expuesto por el usuario:
    - Si el perfil es Docente / Directivo: Redacta un Modelo de Registro en el Observador de Convivencia / Citación a Acudiente (omitiendo teléfono y correo electrónico).
 """
 
-# Mensaje automático de bienvenida
 WELCOME_MESSAGE = f"""
 Saludos. Bienvenido al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de INTESAC.
 
@@ -382,16 +402,36 @@ Este portal brinda orientación sobre el protocolo disciplinario institucional, 
 Por favor, seleccione una de las situaciones predeterminadas a continuación o redacte detalladamente lo sucedido en la casilla de texto inferior.
 """
 
-# Inicialización del historial de chat con saludo automático
+# Inicialización del historial de chat
 if "messages" not in st.session_state or len(st.session_state.messages) == 0:
     st.session_state.messages = [
         {"role": "assistant", "content": WELCOME_MESSAGE}
     ]
 
-# Despliegue de mensajes anteriores
-for msg in st.session_state.messages:
+# Renderizar historial de mensajes y botón de descarga permanente para cada respuesta de la IA
+for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
+
+        # Generación del botón de descarga directa en Word para los mensajes del asistente
+        if msg["role"] == "assistant" and idx > 0:
+            if HAS_DOCX:
+                docx_file = generar_documento_word(msg["content"])
+                st.download_button(
+                    label="📄 Descargar Documento Oficial en Microsoft Word (.docx)",
+                    data=docx_file,
+                    file_name=f"Documento_Convivencia_INTESAC_{idx}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    key=f"dl_word_{idx}",
+                )
+            else:
+                st.download_button(
+                    label="📄 Guardar texto (.txt)",
+                    data=msg["content"],
+                    file_name=f"Documento_Convivencia_INTESAC_{idx}.txt",
+                    mime="text/plain",
+                    key=f"dl_txt_{idx}",
+                )
 
 # Opciones predefinidas rápidas al inicio de la conversación
 selected_option = None
@@ -432,10 +472,7 @@ if prompt:
         st.stop()
 
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.rerun()
 
-# Generación de respuesta utilizando únicamente gemini-3.6-flash
-if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
     try:
         client = genai.Client(api_key=api_key)
 
@@ -449,39 +486,17 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                 )
             )
 
-        with st.chat_message("assistant"):
-            with st.spinner("Procesando información institucional..."):
-                response = client.models.generate_content(
-                    model="gemini-3.6-flash",
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_PROMPT, temperature=0.2
-                    ),
+        with st.spinner("Procesando información institucional..."):
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT, temperature=0.2
+                ),
+            )
+
+            if response and response.text:
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": response.text}
                 )
-
-                if response and response.text:
-                    st.markdown(response.text)
-                    st.session_state.messages.append(
-                        {"role": "assistant", "content": response.text}
-                    )
-
-                    # Generar y ofrecer descarga directa en Microsoft Word (.docx)
-                    if HAS_DOCX:
-                        docx_file = generar_documento_word(response.text)
-                        st.download_button(
-                            label="Descargar Documento Oficial en Microsoft Word (.docx)",
-                            data=docx_file,
-                            file_name="Documento_Convivencia_INTESAC.docx",
-                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        )
-                    else:
-                        st.download_button(
-                            label="Guardar texto para Microsoft Word (.txt)",
-                            data=response.text,
-                            file_name="Plantilla_Descargos_INTESAC.txt",
-                            mime="text/plain",
-                        )
-                    st.rerun()
-
-    except Exception as e:
-        st.error(f"Error de comunicación con el servicio: {e}")
+                st.
