@@ -71,6 +71,36 @@ st.markdown(
         color: #FFFFFF !important;
     }
 
+    /* Corrección para la visibilidad del desplegable (st.expander) en la barra lateral */
+    section[data-testid="stSidebar"] details {
+        background-color: #334155 !important;
+        border: 1px solid #64748B !important;
+        border-radius: 8px !important;
+        padding: 6px 10px !important;
+    }
+
+    section[data-testid="stSidebar"] summary {
+        color: #FFFFFF !important;
+        background-color: #334155 !important;
+        font-weight: 600 !important;
+    }
+
+    section[data-testid="stSidebar"] details[open] {
+        background-color: #334155 !important;
+    }
+
+    section[data-testid="stSidebar"] details p,
+    section[data-testid="stSidebar"] details li {
+        color: #FFFFFF !important;
+    }
+
+    /* Resaltado para los enlaces normativos */
+    section[data-testid="stSidebar"] details a {
+        color: #FDE047 !important;
+        text-decoration: underline !important;
+        font-weight: 600 !important;
+    }
+
     /* 3. Encabezado superior en Azul más oscuro con letras blancas */
     .header-box {
         background-color: #0F172A;
@@ -491,22 +521,3 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                         st.download_button(
                             label=(
                                 "Descargar Documento Oficial en Microsoft Word"
-                                " (.docx)"
-                            ),
-                            data=docx_file,
-                            file_name="Documento_Convivencia_INTESAC.docx",
-                            mime=(
-                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            ),
-                        )
-                    else:
-                        st.download_button(
-                            label="Guardar texto para Microsoft Word (.txt)",
-                            data=response.text,
-                            file_name="Plantilla_Descargos_INTESAC.txt",
-                            mime="text/plain",
-                        )
-                    st.rerun()
-
-    except Exception as e:
-        st.error(f"Error de comunicación con el servicio: {e}")
