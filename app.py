@@ -170,7 +170,7 @@ st.markdown("""
 # Obtener clave API automáticamente si está guardada en Secrets o pedirla
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
-# Barra lateral izquierda
+# Barra lateral izquierda con nuevas opciones
 with st.sidebar:
     st.header("Configuración del Sistema")
     
@@ -179,19 +179,36 @@ with st.sidebar:
     else:
         api_key = st.text_input("Clave API de Gemini", type="password")
     
+    # NUEVA OPCIÓN: Selector de Rol del Usuario
+    user_role = st.selectbox(
+        "Perfil del Consultante:",
+        ["Estudiante", "Acudiente / Padre de Familia", "Docente / Directivo"]
+    )
+    
+    st.markdown("---")
+    
+    # NUEVA OPCIÓN: Consulta de Marco Legal
+    with st.expander("Ver Marco Legal e Institucional"):
+        st.markdown("**Ley 1620 de 2013:** Sistema Nacional de Convivencia Escolar.")
+        st.markdown("**Decreto 1965 de 2013:** Reglamentación de la Ley 1620.")
+        st.markdown("**Art. 29 C.P.:** Derecho fundamental al Debido Proceso.")
+        st.markdown("**Manual INTESAC:** Normativa interna para el desarrollo convivencial.")
+
     st.markdown("---")
     st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación acontecida.")
     st.markdown("2. El sistema categorizará el hecho de acuerdo con la Ley 1620 de 2013 y el Manual de Convivencia de INTESAC.")
-    st.markdown("3. Se estructurará el procedimiento a seguir y la guía de descargos correspondiente.")
+    st.markdown("3. Se estructurará el procedimiento a seguir y la guía correspondiente según su perfil.")
     
     if st.button("Reiniciar consulta"):
         st.session_state.messages = []
         st.rerun()
 
-# Prompt de sistema institucional
-SYSTEM_PROMPT = """
+# Prompt de sistema institucional dinámico según el Rol seleccionado
+SYSTEM_PROMPT = f"""
 Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón INTESAC de Soledad.
+
+Estás orientando a un usuario con el perfil de: {user_role}.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Ley 1620 de 2013, el Decreto 1965 de 2013 y la garantía del debido proceso (Artículo 29 de la Constitución Política).
 
@@ -200,17 +217,21 @@ Importante: Bajo ninguna circunstancia utilices emojis, emoticones ni símbolos 
 Ante cada caso expuesto por el usuario:
 1. Resumen de la situación: Presenta una síntesis objetiva de los hechos reportados.
 2. Clasificación de la falta (Según el Manual de Convivencia de INTESAC):
-   - Situación Tipo I (Leve): Conflictos manejados inadecuadamente o faltas menores a los deberes (incluye presentación personal, exceso de maquillaje, corte de cabello no acorde al manual, uso de accesorios no permitidos, impuntualidad).
-   - Situación Tipo II (Grave): Situaciones de acoso escolar (bullying), ciberacoso o agresiones físicas/verbales sin incapacidad médica.
-   - Situación Tipo III (Gravísima): Presuntos delitos penales, agresiones físicas con incapacidad o porte de elementos prohibidos.
+   - Situación Tipo I (Leve): Conflictos manejados inadecuadamente o faltas menores a los deberes (incluye presentación personal, exceso de maquillaje, corte de cabello no acorde al manual, uso de accesorios no permitidos, impuntualidad, fraude menor, desacato leve).
+   - Situación Tipo II (Grave): Situaciones de acoso escolar (bullying), ciberacoso, agresiones físicas/verbales sin incapacidad médica o porte de elementos no autorizados como vapeadores.
+   - Situación Tipo III (Gravísima): Presuntos delitos penales, agresiones físicas con incapacidad, porte de armas u objetos peligrosos.
 3. Procedimiento institucional: Detalla el protocolo a aplicar según el nivel de falta (llamado de atención verbal, registro en el observador, citación a acudientes o remisión al Comité de Convivencia).
-4. Garantías y Debido Proceso: Indica los derechos del estudiante (derecho a ser escuchado, presunción de inocencia, presentación de pruebas y descargos).
-5. Modelo de Carta de Descargos: Redacta una plantilla formal de descargos dirigida a la Coordinación o Rectoría de INTESAC.
+4. Garantías y Debido Proceso: Indica los derechos aplicables (derecho a ser escuchado, presunción de inocencia, presentación de pruebas y descargos).
+5. Documento / Plantilla Sugerida: 
+   - Si el perfil es Estudiante o Acudiente: Redacta un Modelo de Carta de Descargos dirigido a la Coordinación o Rectoría de INTESAC.
+   - Si el perfil es Docente / Directivo: Redacta un Modelo de Registro en el Observador de Convivencia / Citación a Acudiente.
 """
 
 # Mensaje automático de bienvenida
-WELCOME_MESSAGE = """
+WELCOME_MESSAGE = f"""
 Saludos. Bienvenido al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de INTESAC.
+
+Sesión iniciada como: **{user_role}**.
 
 Este portal brinda orientación sobre el protocolo disciplinario institucional y el debido proceso de acuerdo con el Manual de Convivencia y la Ley 1620 de 2013.
 
@@ -228,7 +249,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Opciones predefinidas rápidas al inicio de la conversación
+# Opciones predefinidas ampliadas al inicio de la conversación (2 columnas x 5 filas)
 selected_option = None
 if len(st.session_state.messages) <= 1:
     st.markdown("**Seleccione el tipo de situación o escriba su caso abajo:**")
@@ -240,6 +261,11 @@ if len(st.session_state.messages) <= 1:
             selected_option = "Ocurrió una situación de conflicto o agresión entre estudiantes dentro de la institución educativa."
         if st.button("Presunto Acoso Escolar (Bullying)"):
             selected_option = "Se presenta una situación reiterada de presunto acoso escolar (bullying) o ciberacoso."
+        if st.button("Fraude académico / Plagio"):
+            selected_option = "Se reporta una falta relacionada con fraude en evaluación o copia no autorizada de tareas."
+        if st.button("Desacato o falta de respeto a docente"):
+            selected_option = "Se presentó un acto de desobediencia o falta de respeto verbal hacia un docente o directivo."
+            
     with col2:
         if st.button("Corte de cabello / Uniforme"):
             selected_option = "Se presenta un llamado de atención por corte de cabello inadecuado o porte incorrecto del uniforme institucional."
@@ -247,6 +273,10 @@ if len(st.session_state.messages) <= 1:
             selected_option = "Se presentó un incumplimiento en los deberes académicos, faltas de asistencia o impuntualidad."
         if st.button("Uso no autorizado de celular/equipos"):
             selected_option = "Se reporta el uso no autorizado de teléfono celular o dispositivos electrónicos durante la jornada escolar."
+        if st.button("Evasión de clase / Ausencia en aula"):
+            selected_option = "El estudiante ingresó a la institución pero no asistió a la clase correspondiente sin justificación."
+        if st.button("Daño a propiedad institucional"):
+            selected_option = "Se reportan daños materiales a los pupitres, paredes u otros bienes de la institución."
 
 # Captura de mensaje del usuario
 user_input = st.chat_input("Escriba aquí los hechos de la situación a evaluar...")
@@ -289,7 +319,15 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                 if response and response.text:
                     st.markdown(response.text)
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
+                    
+                    # NUEVA OPCIÓN: Botón para descargar el resultado en archivo de texto
+                    st.download_button(
+                        label="Guardar / Descargar informe en TXT",
+                        data=response.text,
+                        file_name="Informe_Convivencia_INTESAC.txt",
+                        mime="text/plain"
+                    )
                     st.rerun()
 
     except Exception as e:
-        st.error(f"Error de comunicación con Gemini 3.6 Flash: {e}")
+        st.error(f"Error de comunicación con el servicio: {e}")
