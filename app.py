@@ -221,7 +221,7 @@ if user_input := st.chat_input("Escriba aquí los hechos de la situación a eval
                     parts=[types.Part.from_text(text=m["content"])]
                 )
             )
-            with st.chat_message("assistant"):
+         with st.chat_message("assistant"):
             with st.spinner("Procesando información institucional..."):
                 response = client.models.generate_content(
                     model="gemini-3.6-flash",
