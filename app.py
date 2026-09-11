@@ -15,26 +15,14 @@ except ImportError:
     HAS_DOCX = False
 
 # ==============================================================================
-# ENLACES NORMATIVOS (Pega aquí tus enlaces entre las comillas)
+# ENLACES NORMATIVOS
 # ==============================================================================
-URL_CONSTITUCION_POLITICA = (
-    "https://www.registraduria.gov.co/IMG/pdf/constitucio-politica-colombia-1991.pdf"  # Enlace Constitucion Politica
-)
-URL_LEY_115 = (
-    "https://www.mineducacion.gov.co/1621/articles-85906_archivo_pdf.pdf"  # Enlace Ley 115 de 1994
-)
-URL_LEY_1098 = (
-    "https://www.icbf.gov.co/sites/default/files/codigoinfancialey1098.pdf"  "https://www.minjusticia.gov.co/programas-co/politica-criminal/Documents/SNCRPA/1098%20Ley%20de%20infancia.pdf"  # Enlace Ley 1098 de 2006
-)
-URL_LEY_1620 = (
-    "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=52287"  # Enlace Ley 1620 de 2013
-)
-URL_DECRETO_1965 = (
-    "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=54537"  # Enlace Decreto 1965 de 2013
-)
-URL_MANUAL_INTESAC = (
-    "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing"  # Enlace Manual de Convivencia
-)
+URL_CONSTITUCION_POLITICA = "https://www.registraduria.gov.co/IMG/pdf/constitucio-politica-colombia-1991.pdf"
+URL_LEY_115 = "https://www.mineducacion.gov.co/1621/articles-85906_archivo_pdf.pdf"
+URL_LEY_1098 = "https://www.icbf.gov.co/sites/default/files/codigoinfancialey1098.pdf"
+URL_LEY_1620 = "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=52287"
+URL_DECRETO_1965 = "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=54537"
+URL_MANUAL_INTESAC = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing"
 # ==============================================================================
 
 # Configuración inicial de la página
@@ -325,40 +313,32 @@ with st.sidebar:
     # Consulta de Marco Legal e Institucional con ENLACES DIRECTOS
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
-            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art."
-            " 29 (Debido Proceso y Derechos Fundamentales)."
+            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Debido Proceso y Derechos Fundamentales)."
         )
         st.markdown(
-            f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de"
-            " Educación."
+            f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de Educación."
         )
         st.markdown(
-            f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Código de la Infancia y"
-            " la Adolescencia."
+            f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Código de la Infancia y la Adolescencia."
         )
         st.markdown(
-            f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Sistema Nacional de"
-            " Convivencia Escolar."
+            f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Sistema Nacional de Convivencia Escolar."
         )
         st.markdown(
-            f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Reglamentación"
-            " de la Ley 1620."
+            f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Reglamentación de la Ley 1620."
         )
         st.markdown(
-            f"* **[Manual INTESAC]({URL_MANUAL_INTESAC})**: Manual de"
-            " Convivencia Institucional."
+            f"* **[Manual INTESAC]({URL_MANUAL_INTESAC})**: Manual de Convivencia Institucional."
         )
 
     st.markdown("---")
     st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación acontecida.")
     st.markdown(
-        "2. El sistema categorizará el hecho de acuerdo con el marco legal"
-        " colombiano y el Manual de Convivencia de INTESAC."
+        "2. El sistema categorizará el hecho de acuerdo con el marco legal colombiano y el Manual de Convivencia de INTESAC."
     )
     st.markdown(
-        "3. Se estructurará el procedimiento a seguir y la plantilla"
-        " institucional para Microsoft Word."
+        "3. Se estructurará el procedimiento a seguir y la plantilla institucional para Microsoft Word."
     )
 
     if st.button("Reiniciar consulta"):
@@ -420,57 +400,27 @@ if len(st.session_state.messages) <= 1:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Exceso de maquillaje"):
-            selected_option = (
-                "Se reporta un llamado de atención por exceso de maquillaje o"
-                " incumplimiento del código de presentación personal."
-            )
+            selected_option = "Se reporta un llamado de atención por exceso de maquillaje o incumplimiento del código de presentación personal."
         if st.button("Conflictos / Agresión verbal o física"):
-            selected_option = (
-                "Ocurrió una situación de conflicto o agresión entre"
-                " estudiantes dentro de la institución educativa."
-            )
+            selected_option = "Ocurrió una situación de conflicto o agresión entre estudiantes dentro de la institución educativa."
         if st.button("Presunto Acoso Escolar (Bullying)"):
-            selected_option = (
-                "Se presenta una situación reiterada de presunto acoso escolar"
-                " (bullying) o ciberacoso."
-            )
+            selected_option = "Se presenta una situación reiterada de presunto acoso escolar (bullying) o ciberacoso."
         if st.button("Fraude académico / Plagio"):
-            selected_option = (
-                "Se reporta una falta relacionada con fraude en evaluación o"
-                " copia no autorizada de tareas."
-            )
+            selected_option = "Se reporta una falta relacionada con fraude en evaluación o copia no autorizada de tareas."
         if st.button("Desacato o falta de respeto a docente"):
-            selected_option = (
-                "Se presentó un acto de desobediencia o falta de respeto verbal"
-                " hacia un docente o directivo."
-            )
+            selected_option = "Se presentó un acto de desobediencia o falta de respeto verbal hacia un docente o directivo."
 
     with col2:
         if st.button("Corte de cabello / Uniforme"):
-            selected_option = (
-                "Se presenta un llamado de atención por corte de cabello"
-                " inadecuado o porte incorrecto del uniforme institucional."
-            )
+            selected_option = "Se presenta un llamado de atención por corte de cabello inadecuado o porte incorrecto del uniforme institucional."
         if st.button("Incumplimiento de deberes / Asistencia"):
-            selected_option = (
-                "Se presentó un incumplimiento en los deberes académicos,"
-                " faltas de asistencia o impuntualidad."
-            )
+            selected_option = "Se presentó un incumplimiento en los deberes académicos, faltas de asistencia o impuntualidad."
         if st.button("Uso no autorizado de celular/equipos"):
-            selected_option = (
-                "Se reporta el uso no autorizado de teléfono celular o"
-                " dispositivos electrónicos durante la jornada escolar."
-            )
+            selected_option = "Se reporta el uso no autorizado de teléfono celular o dispositivos electrónicos durante la jornada escolar."
         if st.button("Evasión de clase / Ausencia en aula"):
-            selected_option = (
-                "El estudiante ingresó a la institución pero no asistió a la"
-                " clase correspondiente sin justificación."
-            )
+            selected_option = "El estudiante ingresó a la institución pero no asistió a la clase correspondiente sin justificación."
         if st.button("Daño a propiedad institucional"):
-            selected_option = (
-                "Se reportan daños materiales a los pupitres, paredes u otros"
-                " bienes de la institución."
-            )
+            selected_option = "Se reportan daños materiales a los pupitres, paredes u otros bienes de la institución."
 
 # Captura de mensaje del usuario
 user_input = st.chat_input("Escriba aquí los hechos de la situación a evaluar...")
@@ -519,5 +469,19 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                     if HAS_DOCX:
                         docx_file = generar_documento_word(response.text)
                         st.download_button(
-                            label=(
-                                "Descargar Documento Oficial en Microsoft Word"
+                            label="Descargar Documento Oficial en Microsoft Word (.docx)",
+                            data=docx_file,
+                            file_name="Documento_Convivencia_INTESAC.docx",
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        )
+                    else:
+                        st.download_button(
+                            label="Guardar texto para Microsoft Word (.txt)",
+                            data=response.text,
+                            file_name="Plantilla_Descargos_INTESAC.txt",
+                            mime="text/plain",
+                        )
+                    st.rerun()
+
+    except Exception as e:
+        st.error(f"Error de comunicación con el servicio: {e}")
