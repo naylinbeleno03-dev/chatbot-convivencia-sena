@@ -151,7 +151,7 @@ with st.sidebar:
 
 # Prompt de sistema institucional
 SYSTEM_PROMPT = """
-Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
+Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón INTESAC de Soledad.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Ley 1620 de 2013, el Decreto 1965 de 2013 y la garantía del debido proceso (Artículo 29 de la Constitución Política).
 
@@ -203,7 +203,7 @@ if user_input := st.chat_input("Escriba aquí los hechos de la situación a eval
         with st.chat_message("assistant"):
             with st.spinner("Procesando información institucional..."):
                 response = client.models.generate_content(
-                    model="gemini-1.5-flash",
+                    model="gemini-2.0-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=SYSTEM_PROMPT,
