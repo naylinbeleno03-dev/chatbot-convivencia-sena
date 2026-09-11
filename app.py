@@ -130,7 +130,7 @@ st.markdown("""
 st.markdown("""
     <div class="header-box">
         <h1>Sistema Digital de Llamados de Atención y Convivencia Escolar</h1>
-        <p>Institución Educativa Técnica Sagrado Corazón INTESAC de Soledad — Proyecto SENA</p>
+        <p>Institución Educativa Técnica Sagrado Corazón de Soledad — Proyecto SENA</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -203,7 +203,7 @@ if user_input := st.chat_input("Escriba aquí los hechos de la situación a eval
         with st.chat_message("assistant"):
             with st.spinner("Procesando información institucional..."):
                 response = client.models.generate_content(
-                    model="gemini-2.0-flash",
+                    model="gemini-3.6-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=SYSTEM_PROMPT,
