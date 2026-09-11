@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 from google import genai
 from google.genai import types
@@ -202,16 +203,33 @@ if user_input := st.chat_input("Escriba aquí los hechos de la situación a eval
 
         with st.chat_message("assistant"):
             with st.spinner("Procesando información institucional..."):
-                response = client.models.generate_content(
-                    model="gemini-3.6-flash",
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_PROMPT,
-                        temperature=0.2
-                    )
-                )
-                st.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
+                # Mecanismo de reintento automático ante saturación del servidor (503)
+                max_retries = 3
+                response = None
+                
+                for attempt in range(max_retries):
+                    try:
+                        response = client.models.generate_content(
+                            model="gemini-2.5-flash",
+                            contents=contents,
+                            config=types.GenerateContentConfig(
+                                system_instruction=SYSTEM_PROMPT,
+                                temperature=0.2
+                            )
+                        )
+                        break
+                    except Exception as err:
+                        if ("503" in str(err) or "UNAVAILABLE" in str(err)) and attempt < max_retries - 1:
+                            time.sleep(2)
+                        else:
+                            raise err
+
+                if response and response.text:
+                    st.markdown(response.text)
+                    st.session_state.messages.append({"role": "assistant", "content": response.text})
 
     except Exception as e:
-        st.error(f"Error de comunicación con el servicio: {e}")
+        if "503" in str(e) or "UNAVAILABLE" in str(e):
+            st.error("El servidor de Google está recibiendo un alto volumen de solicitudes en este instante. Por favor, reintente enviar su mensaje en unos segundos.")
+        else:
+            st.error(f"Error de comunicación con el servicio: {e}")
