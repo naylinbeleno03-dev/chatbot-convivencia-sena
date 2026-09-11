@@ -180,7 +180,7 @@ with st.sidebar:
         api_key = st.text_input("Clave API de Gemini", type="password")
     
     st.markdown("---")
-    st.markdown("*Guía de consulta:*")
+    st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación acontecida.")
     st.markdown("2. El sistema categorizará el hecho de acuerdo con la Ley 1620 de 2013 y el Manual de Convivencia de INTESAC.")
     st.markdown("3. Se estructurará el procedimiento a seguir y la guía de descargos correspondiente.")
@@ -191,7 +191,7 @@ with st.sidebar:
 
 # Prompt de sistema institucional
 SYSTEM_PROMPT = """
-Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
+Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón INTESAC de Soledad.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Ley 1620 de 2013, el Decreto 1965 de 2013 y la garantía del debido proceso (Artículo 29 de la Constitución Política).
 
@@ -231,7 +231,7 @@ for msg in st.session_state.messages:
 # Opciones predefinidas rápidas al inicio de la conversación
 selected_option = None
 if len(st.session_state.messages) <= 1:
-    st.markdown("*Seleccione el tipo de situación o escriba su caso abajo:*")
+    st.markdown("**Seleccione el tipo de situación o escriba su caso abajo:**")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Exceso de maquillaje"):
@@ -260,7 +260,7 @@ if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.rerun()
 
-# Generación de respuesta si el último mensaje proviene del usuario
+# Generación de respuesta utilizando únicamente gemini-3.6-flash
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
     try:
         client = genai.Client(api_key=api_key)
@@ -275,9 +275,8 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                 )
             )
 
-
         with st.chat_message("assistant"):
-            with st.spinner("Procesando información institucional..."):
+            with st.spinner("Procesando información institucional con Gemini 3.6 Flash..."):
                 response = client.models.generate_content(
                     model="gemini-3.6-flash",
                     contents=contents,
@@ -286,9 +285,11 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                         temperature=0.2
                     )
                 )
+
                 if response and response.text:
                     st.markdown(response.text)
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
+                    st.rerun()
 
     except Exception as e:
-        st.error(f"Error de comunicación con el servicio: {e}")
+        st.error(f"Error de comunicación con Gemini 3.6 Flash: {e}")
