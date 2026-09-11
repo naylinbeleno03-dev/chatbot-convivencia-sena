@@ -276,7 +276,7 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
             )
 
         with st.chat_message("assistant"):
-            with st.spinner("Procesando información institucional con Gemini 3.6 Flash..."):
+            with st.spinner("Procesando información institucional..."):
                 response = client.models.generate_content(
                     model="gemini-3.6-flash",
                     contents=contents,
