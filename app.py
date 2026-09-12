@@ -54,9 +54,7 @@ def init_db():
     """)
     conn.commit()
     conn.close()
-
-
-def guardar_registro_db(
+    def guardar_registro_db(
     nombre,
     documento,
     grado,
@@ -152,46 +150,71 @@ URL_LEY_1620 = "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.
 URL_MANUAL_CONVIVENCIA = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing"
 
 st.set_page_config(
-    page_title="Sistema Digital de Convivencia Escolar - INTESAC",
+    page_title="Sistema Integral de Convivencia Escolar - INTESAC",
     layout="wide",
 )
 
-# Estilos CSS con mejoras de visibilidad en casillas y barra lateral
+# Estilos CSS optimizados (sin rojos/rosados, flechas claras, sin espacios fantasmas)
 st.markdown(
     """
     <style>
     .stApp { background-color: #F3F4F6; color: #1F2937; font-family: 'Segoe UI', sans-serif; }
     
-    /* Estilos de la barra lateral */
-    section[data-testid="stSidebar"] { background-color: #334155; }
+    /* Barra lateral profesional con grises y azules claros */
+    section[data-testid="stSidebar"] { background-color: #1E293B; color: #F8FAFC; padding-top: 1rem; }
     section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3,
-    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] a { color: #FFFFFF !important; }
+    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] a { color: #F8FAFC !important; }
     
-    /* Casillas de texto y entradas visibles con bordes claros */
+    /* Eliminación total de espacios fantasmas en expansores y contenedores laterales */
+    section[data-testid="stSidebar"] .streamlit-expanderHeader {
+        background-color: #334155 !important;
+        color: #F8FAFC !important;
+        border-radius: 6px !important;
+        margin-bottom: 0px !important;
+        padding: 8px 12px !important;
+    }
+    section[data-testid="stSidebar"] .streamlit-expanderContent {
+        background-color: #1E293B !important;
+        border: none !important;
+        padding-top: 4px !important;
+        padding-bottom: 4px !important;
+        margin-top: 0px !important;
+    }
+    
+    /* Controles y flechas visibles y claras */
+    button[kind="header"], [data-testid="collapsedControl"], svg {
+        fill: #F8FAFC !important;
+        color: #F8FAFC !important;
+    }
+    
+    /* Entradas de texto legibles */
     .stTextInput input, .stTextArea textarea, .stSelectbox [data-baseweb="select"] {
         background-color: #FFFFFF !important;
         color: #0F172A !important;
-        border: 2px solid #475569 !important;
+        border: 1px solid #64748B !important;
         border-radius: 6px !important;
     }
-    
-    /* Contenido dentro de los expansores en la barra lateral */
-    section[data-testid="stSidebar"] .streamlit-expanderContent div, 
-    section[data-testid="stSidebar"] .streamlit-expanderContent span, 
-    section[data-testid="stSidebar"] .streamlit-expanderContent p, 
-    section[data-testid="stSidebar"] .streamlit-expanderContent a {
-        color: #F1F5F9 !important;
-    }
 
-    /* Controles de cierre de barra lateral con buen contraste */
-    button[kind="header"] {
-        background-color: #334155 !important;
-        color: #FFFFFF !important;
-    }
-
-    .header-box { background-color: #0F172A; padding: 22px; border-radius: 12px; border-left: 6px solid #D4AF37; margin-bottom: 20px; }
+    .header-box { background-color: #0F172A; padding: 22px; border-radius: 12px; border-left: 6px solid #64748B; margin-bottom: 20px; }
     .header-box h1 { color: #FFFFFF !important; margin: 0 !important; font-size: 1.65rem !important; }
     .header-box p { color: #E2E8F0 !important; margin-top: 6px !important; }
+    
+    /* Botones laterales sin espacios fantasmas */
+    section[data-testid="stSidebar"] .stButton {
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+    }
+    section[data-testid="stSidebar"] .stButton button {
+        background-color: #334155 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #64748B !important;
+        border-radius: 6px !important;
+        width: 100%;
+    }
+    section[data-testid="stSidebar"] .stButton button:hover {
+        background-color: #475569 !important;
+        border-color: #94A3B8 !important;
+    }
     </style>
 """,
     unsafe_allow_html=True,
@@ -200,8 +223,8 @@ st.markdown(
 st.markdown(
     """
     <div class="header-box">
-        <h1>Sistema Digital de Convivencia Escolar</h1>
-        <p>Institución Educativa Técnica Sagrado Corazón de Soledad (Grados 6° a 11°)</p>
+        <h1>Sistema Integral de Convivencia Escolar</h1>
+        <p>Institución Educativa Técnica Sagrado Corazón de Soledad (6° a 11°)</p>
     </div>
 """,
     unsafe_allow_html=True,
@@ -266,13 +289,12 @@ def generar_documento_word(texto_contenido):
                 pass
 
         r_head = p_head.add_run(
-            "INSTITUCIÓN EDUCATIVA TÉCNICA SAGRADO CORAZÓN\nSistema Digital de"
+            "INSTITUCIÓN EDUCATIVA TÉCNICA SAGRADO CORAZÓN\nSistema Integral de"
             " Seguimiento y Convivencia"
         )
         r_head.font.size = Pt(8)
         r_head.font.bold = True
-
-    lineas = texto_documento.split("\n")
+        lineas = texto_documento.split("\n")
     for linea in lineas:
         linea_limpia = limpiar_texto_para_word(linea)
         if not linea_limpia:
@@ -303,20 +325,9 @@ def generar_documento_word(texto_contenido):
     return buffer.getvalue()
 
 
-# BARRA LATERAL CON CONTROL DE ACCESO, AVISO Y EXPLICACIÓN DE 3 PASOS
+# BARRA LATERAL CON CONFIGURACIÓN Y MARCO LEGAL EXPLICADO
 with st.sidebar:
     st.header("Configuración del Sistema")
-
-    st.markdown(
-        "**Aviso importante:** Si la aplicación tarda entre 30 y 40 segundos"
-        " en cargar, es debido a que el servidor se encontraba en suspensión"
-        " por inactividad. Por favor, espere un momento a que inicie.\n\n"
-        "**Funcionamiento del sistema en 3 pasos:**\n"
-        "1. **Asistencia:** Redacte su borrador con el asistente.\n"
-        "2. **Envío:** Remita el archivo al correo institucional.\n"
-        "3. **Publicación:** El directivo revisa y publica oficialmente."
-    )
-    st.markdown("---")
 
     if not api_key:
         api_key = st.text_input("Clave API de Gemini", type="password")
@@ -339,11 +350,21 @@ with st.sidebar:
 
     st.markdown("---")
     with st.expander("Ver Marco Legal e Institucional"):
-        st.markdown(f"* [Constitución Política]({URL_CONSTITUCION_POLITICA})")
-        st.markdown(f"* [Ley 115 de 1994]({URL_LEY_115})")
-        st.markdown(f"* [Ley 1098 de 2006]({URL_LEY_1098})")
-        st.markdown(f"* [Ley 1620 de 2013]({URL_LEY_1620})")
-        st.markdown(f"* [Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})")
+        st.markdown(
+            f"* **Constitución Política de 1991** ([Ver PDF]({URL_CONSTITUCION_POLITICA})): Garantiza los derechos fundamentales, el debido proceso y la educación como derecho y deber social."
+        )
+        st.markdown(
+            f"* **Ley 115 de 1994** ([Ver PDF]({URL_LEY_115})): Ley General de Educación que regula el servicio público educativo cumpliendo con los fines de la formación integral."
+        )
+        st.markdown(
+            f"* **Ley 1098 de 2006** ([Ver PDF]({URL_LEY_1098})): Código de Infancia y Adolescencia, establece la protección integral de los niños, niñas y adolescentes."
+        )
+        st.markdown(
+            f"* **Ley 1620 de 2013** ([Ver PDF]({URL_LEY_1620})): Crea el Sistema Nacional de Convivencia Escolar y formación para los derechos humanos, la educación para la sexualidad y la prevención y mitigación de la violencia escolar."
+        )
+        st.markdown(
+            f"* **Manual de Convivencia Institucional** ([Ver Documento]({URL_MANUAL_CONVIVENCIA})): Lineamientos, deberes, derechos y rutas de atención de la Institución Educativa Técnica Sagrado Corazón."
+        )
 
     st.markdown("---")
     if st.button("Reiniciar consulta"):
@@ -351,10 +372,14 @@ with st.sidebar:
         st.rerun()
 
 SYSTEM_PROMPT = f"""
-Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad (Grados 6° a 11°).
+Eres el asistente institucional del Sistema Integral de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad (6° a 11°).
 Perfil actual: {user_role}.
 
-Tu propósito es orientar al usuario en la redacción de sus documentos institucionales basándote en el Manual de Convivencia, la Ley 1620 de 2013, la Ley 1098 de 2006 y demás normativas colombianas.
+Tu propósito es orientar automáticamente al usuario en la redacción de documentos institucionales de forma inteligente, seleccionando y generando de manera automática el documento correcto según la situación descrita:
+1. **ACTA DE COMPROMISO Y CONVIVENCIA ESCOLAR**: Se genera automáticamente cuando se requiere acordar compromisos académicos o de comportamiento.
+2. **MODELO DE CARTA DE DESCARGOS**: Se genera automáticamente cuando el estudiante o acudiente necesita ejercer su derecho a la defensa ante una situación reportada.
+3. **REGISTRO EN EL OBSERVADOR DEL ESTUDIANTE**: Se genera automáticamente cuando se trata de una constancia de seguimiento o llamado de atención formal.
+
 IMPORTANTE: Aclara al usuario que las actas y documentos generados en este chat son borradores orientativos que deben enviarse al correo institucional ({CORREO_INSTITUCIONAL}) para ser analizados y posteriormente publicados por un directivo en la biblioteca oficial.
 
 DATOS OBLIGATORIOS REQUERIDOS (6° a 11°):
@@ -365,11 +390,6 @@ DATOS OBLIGATORIOS REQUERIDOS (6° a 11°):
 5. Nombre del docente a cargo / reportante
 6. Horario y Fecha exacta de los hechos
 
-DOCUMENTOS OFICIALES DISPONIBLES QUE PUEDES GENERAR:
-- **ACTA DE COMPROMISO Y CONVIVENCIA ESCOLAR** (Para compromisos académicos y de comportamiento).
-- **MODELO DE CARTA DE DESCARGOS** (Para que el estudiante o acudiente ejerza su derecho a la defensa).
-- **REGISTRO EN EL OBSERVADOR DEL ESTUDIANTE** (Para constancias de seguimiento y llamados de atención).
-
 Si faltan datos, solicítalos amablemente. Cuando estén completos, genera el reporte completo con el documento digital formal al final, incluyendo espacios para firmas.
 """
 
@@ -377,9 +397,9 @@ tab_chat, tab_repositorio = st.tabs(
     ["Asistente y Generador de Actas", "Biblioteca / Repositorio Virtual"]
 )
 
-# PESTAÑA 1: CHATBOT (SOLO ASISTENTE Y GENERADOR DE BORRADORES)
+# PESTAÑA 1: CHATBOT Y GENERADOR AUTOMÁTICO
 with tab_chat:
-    WELCOME_MESSAGE = f"Saludos. Bienvenido(a) al Sistema Digital de Convivencia Escolar de INTESAC.\n\nSesión iniciada como: **{user_role}**.\n\n*Nota: Este chat orienta y genera su borrador de acta o descargos. Para su registro oficial, descargue el archivo Word y envíelo al correo **{CORREO_INSTITUCIONAL}** para validación directiva.*"
+    WELCOME_MESSAGE = f"Saludos. Bienvenido(a) al Sistema Integral de Convivencia Escolar de INTESAC.\n\nSesión iniciada como: **{user_role}**.\n\n*Nota: Este chat orienta y genera su borrador de acta o descargos de forma automática. Para su registro oficial, descargue el archivo Word y envíelo al correo **{CORREO_INSTITUCIONAL}** para validación directiva.*"
 
     if "messages" not in st.session_state or len(st.session_state.messages) == 0:
         st.session_state.messages = [
@@ -393,7 +413,11 @@ with tab_chat:
                 msg["role"] == "assistant"
                 and idx > 0
                 and HAS_DOCX
-                and ("ACTA" in msg["content"].upper() or "CARTA" in msg["content"].upper() or "REGISTRO" in msg["content"].upper())
+                and (
+                    "ACTA" in msg["content"].upper()
+                    or "CARTA" in msg["content"].upper()
+                    or "REGISTRO" in msg["content"].upper()
+                )
             ):
                 docx_bytes = generar_documento_word(msg["content"])
                 st.download_button(
@@ -443,13 +467,15 @@ with tab_chat:
                     )
                     st.rerun()
         except Exception as e:
-            st.error(f"Error en la consulta: {e}")
+            st.error(
+                f"Error en el servicio o inactividad temporal del servidor. Por"
+                f" favor espere unos segundos e intente nuevamente. Detalle: {e}"
+            )
 
-# PESTAÑA 2: REPOSITORIO VIRTUAL (PUBLICACIÓN EXCLUSIVA DE DIRECTIVOS)
+# PESTAÑA 2: REPOSITORIO VIRTUAL
 with tab_repositorio:
     st.subheader("Repositorio Digital de Seguimiento Disciplinario")
 
-    # PERMISO DOCENTE / DIRECTIVO (PUBLICACIÓN Y GESTIÓN OFICIAL)
     if user_role == "Docente / Directivo":
         if autenticado_directivo:
             st.info(
@@ -457,7 +483,6 @@ with tab_repositorio:
                 " documentos y actas oficiales en la biblioteca institucional."
             )
 
-            # Formulario exclusivo de publicación oficial
             with st.expander(
                 "Publicar Documento u Acta Oficial Analizada en la Biblioteca"
             ):
@@ -522,7 +547,7 @@ with tab_repositorio:
                             st.rerun()
 
             st.markdown("---")
-            # Filtros de Búsqueda
+
             col_b1, col_b2, col_b3, col_b4 = st.columns([2, 1, 1, 1])
             with col_b1:
                 search_txt = st.text_input(
@@ -589,8 +614,6 @@ with tab_repositorio:
                 "Acceso Restringido: Ingrese la clave de acceso directivo en la"
                 " barra lateral para gestionar la biblioteca oficial."
             )
-
-    # PERMISO ESTUDIANTE / ACUDIENTE (CONSULTA DE ACTAS PUBLICADAS)
     else:
         st.info(
             "Consulta de Estado de Convivencia: Ingrese su Tarjeta de"
