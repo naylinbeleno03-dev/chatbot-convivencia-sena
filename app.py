@@ -33,7 +33,7 @@ URL_MANUAL_CONVIVENCIA = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga
 
 # Configuración inicial de la página
 st.set_page_config(
-    page_title="Sistema Integral de Convivencia Escolar - Institución Educativa Técnica Sagrado Corazón",
+    page_title="Sistema Digital de Convivencia Escolar - Institución Educativa Técnica Sagrado Corazón",
     layout="centered",
 )
 
@@ -65,7 +65,7 @@ st.markdown(
         color: #FFFFFF !important;
     }
 
-    /* Corrección para la visibilidad del desplegable (st.expander) en la barra lateral */
+    /* Visibilidad del desplegable (st.expander) en la barra lateral */
     section[data-testid="stSidebar"] details {
         background-color: #334155 !important;
         border: 1px solid #64748B !important;
@@ -95,7 +95,7 @@ st.markdown(
         font-weight: 600 !important;
     }
 
-    /* 3. Encabezado superior en Azul más oscuro con letras blancas */
+    /* 3. Encabezado superior */
     .header-box {
         background-color: #0F172A;
         padding: 22px;
@@ -200,7 +200,7 @@ st.markdown(
         background-color: #FFFFFF !important;
     }
 
-    /* Botón de Enviar en Negro */
+    /* Botón de Enviar */
     [data-testid="stChatInput"] button {
         background-color: #000000 !important;
         border-color: #000000 !important;
@@ -225,7 +225,7 @@ st.markdown(
 st.markdown(
     """
     <div class="header-box">
-        <h1>Sistema Integral de Convivencia Escolar</h1>
+        <h1>Sistema Digital de Convivencia Escolar</h1>
         <p>Institución Educativa Técnica Sagrado Corazón</p>
     </div>
 """,
@@ -258,12 +258,13 @@ def extraer_solo_documento(texto_contenido: str) -> str:
         r"(ACTA DE COMPROMISO.*)",
         r"(MODELO DE CARTA.*)",
         r"(MODELO DE REGISTRO.*)",
-        r"(CARTA DE DESCARGOS.*)",
         r"(REGISTRO EN EL OBSERVADOR.*)",
+        r"(CARTA DE DESCARGOS.*)",
         r"(CITACIÓN A ACUDIENTE.*)",
         r"(5\.\s*MODELO.*)",
         r"(5\.\s*DOCUMENTO.*)",
         r"(5\.\s*ACTA.*)",
+        r"(5\.\s*REGISTRO.*)",
     ]
 
     for patron in patrones:
@@ -272,7 +273,7 @@ def extraer_solo_documento(texto_contenido: str) -> str:
             texto_extraido = match.group(1)
             lineas = texto_extraido.split("\n")
             if re.match(
-                r"^5\.\s*(MODELO|DOCUMENTO|PLANTILLA|ACTA)",
+                r"^5\.\s*(MODELO|DOCUMENTO|PLANTILLA|ACTA|REGISTRO)",
                 lineas[0].strip(),
                 re.IGNORECASE,
             ):
@@ -368,6 +369,7 @@ def generar_documento_word(texto_contenido):
             or "MODELO DE CARTA" in linea.upper()
             or "CARTA DE DESCARGOS" in linea.upper()
             or "MODELO DE REGISTRO" in linea.upper()
+            or "REGISTRO EN EL OBSERVADOR" in linea.upper()
         ):
 
             texto_titulo = linea_limpia.replace("#", "").replace("**", "")
@@ -388,7 +390,7 @@ def generar_documento_word(texto_contenido):
             run.font.name = "Arial"
             run.font.bold = "FIRMA" in linea.upper()
             run.font.color.rgb = RGBColor(31, 41, 55)
-            # Dar espacio vertical suficiente (36pt) para la firma manuscrita/digital
+            # Dar espacio vertical suficiente (36pt) para la firma
             if "________________" in linea:
                 p.paragraph_format.space_before = Pt(36)
                 p.paragraph_format.space_after = Pt(2)
@@ -488,14 +490,25 @@ Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ant
 
 Instrucciones estrictamente obligatorias de formato y contenido para la plantilla digital:
 - Este sistema es 100% digital para el archivo y repositorio institucional por año escolar. Queda ESTRICTAMENTE PROHIBIDO mencionar que el documento debe ser impreso, firmado en papel o presentado en físico.
-- NO incluyas textos, títulos ni meta-etiquetas como "DOCENTE O COORDINADOR QUE ACOMPAÑA", "RESUMEN DE LA OBSERVACIÓN DE CARGOS" o similares dentro de la plantilla.
+- NO incluyas meta-etiquetas ni subtítulos innecesarios dentro de la plantilla.
 - El texto debe fluir de forma continua, limpia y profesional.
-- Utiliza líneas de subrayado únicamente en el párrafo inicial para los datos básicos: "Por medio de la presente, yo ______________________, identificado(a) con documento N.° ______________________, estudiante del grado ______________________, presento..."
 - No recargues el texto con negritas ni mayúsculas sostenidas. Mantén los párrafos en texto normal.
 - Cuando vayas a indicar los compromisos o acuerdos, represéntalos únicamente como una lista numerada secuencial (1., 2., 3.).
-- Al final de la plantilla, incluye siempre el bloque formal de firmas con espacio adecuado:
+- Al final de la plantilla, incluye siempre el bloque formal de firmas con espacio adecuado.
 
-  Lugar y fecha: ______________________, _____ de ______________________ de 20____
+Reglas obligatorias de contexto según el hecho reportado:
+- Para situaciones de Fraude académico / Plagio o Desacato / Falta de respeto a docente: Especifica de manera obligatoria la Asignatura / Clase en la que ocurrió el hecho y el nombre del Docente a cargo.
+- Para situaciones de Evasión de clase / Ausencia en aula: Especifica de manera obligatoria la Asignatura / Clase y el Rango de horas o intervalo de tiempo en el que se produjo la evasión (ejemplo: de _____ a _____ horas).
+
+Estructura específica para cada perfil en la plantilla sugerida:
+- Si el perfil es Estudiante o Acudiente: Inicia con el título exacto "ACTA DE COMPROMISO Y DESCARGOS ESTUDIANTILES" y utiliza un párrafo inicial limpio con líneas de subrayado para los datos básicos: "Por medio de la presente, yo ______________________, identificado(a) con documento N.° ______________________, estudiante del grado ______________________, presento mis descargos sobre lo sucedido en la clase de ______________________ durante el horario de _____ a _____ con el/la docente ______________________..."
+- Si el perfil es Docente / Directivo: Inicia con el título exacto "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA ESCOLAR" e incluye al inicio los datos de la novedad de forma clara:
+  Fecha: ______________________ | Asignatura / Clase: ______________________ | Horario: de _____ a _____ horas
+  Docente reportante: ______________________ | Estudiante: ______________________ | Grado: ______________________
+  Posteriormente redacta la descripción objetiva de los hechos acontecidos durante la clase de forma seguida, seguida de los acuerdos o compromisos numerados (1., 2., 3.).
+
+Bloque final de firmas para el documento digital:
+  Lugar y fecha de diligenciamiento: ______________________, _____ de ______________________ de 20____
 
 
   ____________________________________
@@ -509,10 +522,10 @@ Instrucciones estrictamente obligatorias de formato y contenido para la plantill
 
 
   ____________________________________
-  Firma de Coordinación / Dirección
+  Firma del Docente Reportante / Coordinación
 
 Ante cada caso expuesto por el usuario:
-1. Resumen de la situación: Presenta una síntesis objetiva de los hechos reportados.
+1. Resumen de la situación: Presenta una síntesis objetiva de los hechos reportados (detallando asignatura, docente y rango horario según aplique).
 2. Clasificación de la falta (Según el Manual de Convivencia y Ley 1620 de 2013):
    - Situación Tipo I (Leve): Conflictos manejados inadecuadamente o faltas menores a los deberes.
    - Situación Tipo II (Grave): Situaciones de acoso escolar (bullying), ciberacoso o agresiones físicas/verbales sin incapacidad médica.
@@ -520,8 +533,8 @@ Ante cada caso expuesto por el usuario:
 3. Procedimiento institucional: Detalla el protocolo a aplicar según el nivel de falta.
 4. Garantías y Debido Proceso: Indica los derechos aplicables protegidos por el Artículo 29 de la Constitución Política.
 5. Modelo de Documento Digital Sugerido:
-   - Si el perfil es Estudiante o Acudiente: Inicia con el título exacto "ACTA DE COMPROMISO Y DESCARGOS ESTUDIANTILES" y redacta el modelo fluido, con lista numerada y el bloque de firmas al final.
-   - Si el perfil es Docente / Directivo: Inicia con el título exacto "MODELO DE REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" y redacta el modelo fluido, con lista numerada y el bloque de firmas al final.
+   - Si el perfil es Estudiante o Acudiente: Inicia con "ACTA DE COMPROMISO Y DESCARGOS ESTUDIANTILES" adaptado con subrayados (incluyendo asignatura, horario de _____ a _____ y docente).
+   - Si el perfil es Docente / Directivo: Inicia con "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA ESCOLAR" incluyendo fecha, asignatura/clase, horario (de _____ a _____), docente reportante, hechos y compromisos.
 """
 
 WELCOME_MESSAGE = f"""
@@ -533,6 +546,7 @@ Este portal brinda orientación sobre el protocolo disciplinario institucional, 
 
 Por favor, seleccione una de las situaciones predeterminadas a continuación o redacte detalladamente lo sucedido en la casilla de texto inferior.
 """
+
 # Inicialización del historial de chat
 if "messages" not in st.session_state or len(st.session_state.messages) == 0:
     st.session_state.messages = [
@@ -585,9 +599,9 @@ if len(st.session_state.messages) <= 1:
         if st.button("Presunto Acoso Escolar (Bullying)"):
             selected_option = "Se presenta una situación reiterada de presunto acoso escolar (bullying) o ciberacoso."
         if st.button("Fraude académico / Plagio"):
-            selected_option = "Se reporta una falta relacionada con fraude en evaluación o copia no autorizada de tareas."
+            selected_option = "Se reporta una falta relacionada con fraude académico o plagio en evaluación durante la clase de la asignatura correspondiente."
         if st.button("Desacato o falta de respeto a docente"):
-            selected_option = "Se presentó un acto de desobediencia o falta de respeto verbal hacia un docente o directivo."
+            selected_option = "Se presentó un acto de desobediencia o falta de respeto verbal hacia un docente durante el desarrollo de la clase."
 
     with col2:
         if st.button("Corte de cabello / Uniforme"):
@@ -597,7 +611,7 @@ if len(st.session_state.messages) <= 1:
         if st.button("Uso no autorizado de celular/equipos"):
             selected_option = "Se reporta el uso no autorizado de teléfono celular o dispositivos electrónicos durante la jornada escolar."
         if st.button("Evasión de clase / Ausencia en aula"):
-            selected_option = "El estudiante ingresó a la institución pero no asistió a la clase correspondiente sin justificación."
+            selected_option = "El estudiante ingresó a la institución pero evadió la clase o se ausentó del aula entre determinadas horas de la jornada escolar."
         if st.button("Daño a propiedad institucional"):
             selected_option = "Se reportan daños materiales a los pupitres, paredes u otros bienes de la institución."
 
