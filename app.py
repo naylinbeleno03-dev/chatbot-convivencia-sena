@@ -316,9 +316,12 @@ def generar_documento_word(texto_contenido):
                 break
 
         if imagen_encontrada:
-            r_img = p_head.add_run()
-            r_img.add_picture(imagen_encontrada, width=Inches(0.55))
-            p_head.add_run("\n")
+            try:
+                r_img = p_head.add_run()
+                r_img.add_picture(imagen_encontrada, width=Inches(0.55))
+                p_head.add_run("\n")
+            except Exception:
+                pass
 
         r_head = p_head.add_run(
             "INSTITUCIÓN EDUCATIVA TÉCNICA SAGRADO CORAZÓN\nSistema Digital de"
@@ -388,11 +391,11 @@ def generar_documento_word(texto_contenido):
                 run.font.name = "Arial"
                 run.font.color.rgb = RGBColor(31, 41, 55)
 
-    # Guardar archivo en memoria
+    # Guardar archivo en memoria y retornar bytes
     buffer = io.BytesIO()
     doc.save(buffer)
     buffer.seek(0)
-    return buffer
+    return buffer.getvalue()
 
 
 # Barra lateral izquierda
@@ -461,7 +464,7 @@ Estás orientando a un usuario con el perfil de: {user_role}.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de la Institución Educativa Técnica Sagrado Corazón.
 
-Instrucciones estrictamente obligatorias de formato y contenido:
+Instrucciones strictly obligatorias de formato y contenido:
 - Este sistema es 100% digital para el archivo y repositorio institucional. Queda ESTRICTAMENTE PROHIBIDO mencionar que el documento debe ser impreso, firmado en papel o presentado en físico.
 - Bajo ninguna circunstancia utilices emojis, emoticones, viñetas con guiones ni símbolos gráficos decorativos. Mantén un formato totalmente sobrio, formal, profesional y estructurado con títulos y subtítulos claros en negrita.
 - NO utilices guiones ni asteriscos al inicio de párrafo. Redacta párrafos completos e integrales.
@@ -506,18 +509,27 @@ for idx, msg in enumerate(st.session_state.messages):
         # Generación del botón de descarga directa en Word para los mensajes del asistente
         if msg["role"] == "assistant" and idx > 0:
             if HAS_DOCX:
-                docx_file = generar_documento_word(msg["content"])
+                docx_bytes = generar_documento_word(msg["content"])
                 st.download_button(
-                    label="📄 Descargar Documento Oficial en Microsoft Word (.docx)",
-                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    label=(
+                        "📄 Descargar Documento Oficial en Microsoft Word (.docx)"
+                    ),
+                    data=docx_bytes,
+                    file_name=(
+                        f"Documento_Convivencia_SagradoCorazon_{idx}.docx"
+                    ),
+                    mime=(
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    ),
                     key=f"dl_word_{idx}",
                 )
             else:
                 st.download_button(
                     label="📄 Guardar texto (.txt)",
                     data=msg["content"],
-                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
+                    file_name=(
+                        f"Documento_Convivencia_SagradoCorazon_{idx}.txt"
+                    ),
                     mime="text/plain",
                     key=f"dl_txt_{idx}",
                 )
