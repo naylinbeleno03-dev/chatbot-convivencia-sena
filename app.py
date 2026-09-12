@@ -357,7 +357,7 @@ def generar_documento_word(texto_contenido):
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
 
-        # Formato para el título principal del documento
+        # Detectar si la línea es el título principal del documento
         if (
             linea.strip().startswith("#")
             or (
@@ -377,13 +377,30 @@ def generar_documento_word(texto_contenido):
             run.font.size = Pt(12)
             run.font.name = "Arial"
             run.font.color.rgb = RGBColor(15, 23, 42)
-            p.paragraph_format.space_before = Pt(8)
-            p.paragraph_format.space_after = Pt(10)
+            p.paragraph_format.space_before = Pt(10)
+            p.paragraph_format.space_after = Pt(12)
+
+        # Detectar líneas de firma para darles espaciado amplio superior
+        elif "________________" in linea or "FIRMA" in linea.upper():
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            run = p.add_run(linea_limpia.replace("**", ""))
+            run.font.size = Pt(10)
+            run.font.name = "Arial"
+            run.font.bold = "FIRMA" in linea.upper()
+            run.font.color.rgb = RGBColor(31, 41, 55)
+            # Dar espacio vertical suficiente (36pt) para la firma manuscrita/digital
+            if "________________" in linea:
+                p.paragraph_format.space_before = Pt(36)
+                p.paragraph_format.space_after = Pt(2)
+            else:
+                p.paragraph_format.space_before = Pt(2)
+                p.paragraph_format.space_after = Pt(4)
+
         else:
-            # Alineación justificada para el cuerpo
+            # Alineación justificada para el texto normal
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
-            # Formato moderado de negritas evitando saturación
+            # Formato moderado evitando negritas innecesarias
             partes = re.split(r"(\*\*.*?\*\*)", linea_limpia)
             for parte in partes:
                 if parte.startswith("**") and parte.endswith("**"):
@@ -471,22 +488,28 @@ Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ant
 
 Instrucciones estrictamente obligatorias de formato y contenido para la plantilla digital:
 - Este sistema es 100% digital para el archivo y repositorio institucional por año escolar. Queda ESTRICTAMENTE PROHIBIDO mencionar que el documento debe ser impreso, firmado en papel o presentado en físico.
-- NO repitas innecesariamente el nombre de la institución en el cuerpo del documento.
-- NO repitas continuamente el nombre del estudiante. Utiliza un párrafo inicial con líneas de subrayado para diligenciar los datos principales (`____________________`).
-- Limita el uso de negritas. NO recargues el texto en negrita; mantén la redacción en texto normal, usando negritas únicamente para el título principal y las etiquetas de firmas.
-- Utiliza subrayados limpios (`____________________`) para los campos editables digitalmente.
-- Incluye al final del documento un bloque formal de firmas de acuerdo con el estilo institucional:
-  
+- NO incluyas textos, títulos ni meta-etiquetas como "DOCENTE O COORDINADOR QUE ACOMPAÑA", "RESUMEN DE LA OBSERVACIÓN DE CARGOS" o similares dentro de la plantilla.
+- El texto debe fluir de forma continua, limpia y profesional.
+- Utiliza líneas de subrayado únicamente en el párrafo inicial para los datos básicos: "Por medio de la presente, yo ______________________, identificado(a) con documento N.° ______________________, estudiante del grado ______________________, presento..."
+- No recargues el texto con negritas ni mayúsculas sostenidas. Mantén los párrafos en texto normal.
+- Cuando vayas a indicar los compromisos o acuerdos, represéntalos únicamente como una lista numerada secuencial (1., 2., 3.).
+- Al final de la plantilla, incluye siempre el bloque formal de firmas con espacio adecuado:
+
+  Lugar y fecha: ______________________, _____ de ______________________ de 20____
+
+
   ____________________________________
   Firma del Estudiante
   Documento de Identidad N.° ____________________
+
 
   ____________________________________
   Firma del Acudiente / Representante Legal
   Documento de Identidad N.° ____________________
 
+
   ____________________________________
-  Firma de Coordinación / Docente
+  Firma de Coordinación / Dirección
 
 Ante cada caso expuesto por el usuario:
 1. Resumen de la situación: Presenta una síntesis objetiva de los hechos reportados.
@@ -497,8 +520,8 @@ Ante cada caso expuesto por el usuario:
 3. Procedimiento institucional: Detalla el protocolo a aplicar según el nivel de falta.
 4. Garantías y Debido Proceso: Indica los derechos aplicables protegidos por el Artículo 29 de la Constitución Política.
 5. Modelo de Documento Digital Sugerido:
-   - Si el perfil es Estudiante o Acudiente: Inicia con el título exacto "ACTA DE COMPROMISO Y CARTA DE DESCARGOS ESTUDIANTIL" y redacta el modelo estructurado de manera limpia, sin negritas excesivas y con el bloque de firmas al final.
-   - Si el perfil es Docente / Directivo: Inicia con el título exacto "MODELO DE REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" y redacta el modelo de manera limpia con el bloque de firmas al final.
+   - Si el perfil es Estudiante o Acudiente: Inicia con el título exacto "ACTA DE COMPROMISO Y DESCARGOS ESTUDIANTILES" y redacta el modelo fluido, con lista numerada y el bloque de firmas al final.
+   - Si el perfil es Docente / Directivo: Inicia con el título exacto "MODELO DE REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" y redacta el modelo fluido, con lista numerada y el bloque de firmas al final.
 """
 
 WELCOME_MESSAGE = f"""
@@ -510,14 +533,13 @@ Este portal brinda orientación sobre el protocolo disciplinario institucional, 
 
 Por favor, seleccione una de las situaciones predeterminadas a continuación o redacte detalladamente lo sucedido en la casilla de texto inferior.
 """
-
 # Inicialización del historial de chat
 if "messages" not in st.session_state or len(st.session_state.messages) == 0:
     st.session_state.messages = [
         {"role": "assistant", "content": WELCOME_MESSAGE}
     ]
 
-# Renderizar historial de mensajes y botón de descarga para cada respuesta del asistente
+# Renderizar historial de mensajes y botón de descarga permanente para cada respuesta del asistente
 for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
