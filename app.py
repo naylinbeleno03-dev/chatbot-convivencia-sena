@@ -20,10 +20,10 @@ except ImportError:
     HAS_DOCX = False
 
 # CLAVE MAESTRA PARA DOCENTES / DIRECTIVOS
-CLAVE_DIRECTIVA_CORRECTA = st.secrets.get("CLAVE_DOCENTE", "INTESAC2026")
+CLAVE_DIRECTIVA_CORRECTA = st.secrets.get("CLAVE_DOCENTE", "1ntesacSOLEDADgrupo1")
 
 # CORREO INSTITUCIONAL DE RECEPCIÓN DE DOCUMENTOS
-CORREO_INSTITUCIONAL = "convivencia@intesac.edu.co"
+CORREO_INSTITUCIONAL = "naylinbeleno03@gmail.com"
 
 # ==============================================================================
 # BASE DE DATOS SQLITE - REPOSITORIO VIRTUAL
@@ -76,7 +76,7 @@ def guardar_registro_db(
         cursor.execute(
             """
             INSERT INTO registros_convivencia 
-            (estudiante_nombre, estudiante_documento, grado, jornada, asignatura, docente, horario, fecha_hechos, tipo_falta, ano_lectivo, contenido_texto)
+            (estudiante_nombre, estudiante_documento, grado, jornada, asignatura, docente, horario, fecha_hechos, tipo_falta, an_lectivo, contenido_texto)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
@@ -89,7 +89,7 @@ def guardar_registro_db(
                 horario,
                 fecha,
                 tipo_falta,
-                ano_actual,
+                an_actual,
                 contenido,
             ),
         )
@@ -106,7 +106,7 @@ def consultar_registros_db(
 ):
     """Consulta registros en la biblioteca virtual."""
     conn = sqlite3.connect(DB_NAME)
-    query = "SELECT id, estudiante_nombre, estudiante_documento, grado, jornada, asignatura, docente, fecha_hechos, tipo_falta, ano_lectivo, contenido_texto, fecha_registro FROM registros_convivencia WHERE 1=1"
+    query = "SELECT id, estudiante_nombre, estudiante_documento, grado, jornada, asignatura, docente, fecha_hechos, tipo_falta, an_lectivo, contenido_texto, fecha_registro FROM registros_convivencia WHERE 1=1"
     params = []
 
     if doc_exacto:
@@ -117,8 +117,8 @@ def consultar_registros_db(
             query += " AND (estudiante_nombre LIKE ? OR estudiante_documento LIKE ? OR docente LIKE ?)"
             params.extend([f"%{busqueda}%", f"%{busqueda}%", f"%{busqueda}%"])
 
-        if ano and ano != "Todos":
-            query += " AND ano_lectivo = ?"
+        if an and an != "Todos":
+            query += " AND an_lectivo = ?"
             params.append(int(ano))
 
         if grado and grado != "Todos":
@@ -152,7 +152,7 @@ URL_LEY_1620 = "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.
 URL_MANUAL_CONVIVENCIA = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing"
 
 st.set_page_config(
-    page_title="Sistema Digital de Convivencia Escolar - INTESAC",
+    page_title="Sistema Integral de Convivencia Escolar - INTESAC",
     layout="wide",
 )
 
@@ -175,8 +175,8 @@ st.markdown(
 st.markdown(
     """
     <div class="header-box">
-        <h1>Sistema Digital de Convivencia Escolar</h1>
-        <p>Institución Educativa Técnica Sagrado Corazón de Soledad (Grados 6° a 11°)</p>
+        <h1>Sistema Integral de Convivencia Escolar</h1>
+        <p>Institución Educativa Técnica Sagrado Corazón de Soledad (6° a 11°)</p>
     </div>
 """,
     unsafe_allow_html=True,
@@ -333,7 +333,7 @@ tab_chat, tab_repositorio = st.tabs(
 
 # PESTAÑA 1: CHATBOT (SOLO ASISTENTE Y GENERADOR DE BORRADORES)
 with tab_chat:
-    WELCOME_MESSAGE = f"Saludos. Bienvenido(a) al Sistema Digital de Convivencia Escolar de INTESAC.\n\nSesión iniciada como: **{user_role}**.\n\n*Nota: Este chat orienta y genera su borrador de acta. Para su registro oficial, descargue el archivo Word y envíelo al correo **{CORREO_INSTITUCIONAL}** para validación directiva.*"
+    WELCOME_MESSAGE = f"Saludos. Bienvenido(a) al Sistema Integral de Convivencia Escolar de INTESAC.\n\nSesión iniciada como: **{user_role}**.\n\n*Nota: Este chat orienta y genera su borrador de acta. Para su registro oficial, descargue el archivo Word y envíelo al correo **{CORREO_INSTITUCIONAL}** para validación directiva.*"
 
     if "messages" not in st.session_state or len(st.session_state.messages) == 0:
         st.session_state.messages = [
