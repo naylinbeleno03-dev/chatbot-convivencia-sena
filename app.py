@@ -20,10 +20,10 @@ except ImportError:
     HAS_DOCX = False
 
 # CLAVE MAESTRA PARA DOCENTES / DIRECTIVOS
-CLAVE_DIRECTIVA_CORRECTA = st.secrets.get("CLAVE_DOCENTE", "1ntesacSOLEDADgrupo1")
+CLAVE_DIRECTIVA_CORRECTA = st.secrets.get("CLAVE_DOCENTE", "INTESAC2026")
 
 # CORREO INSTITUCIONAL DE RECEPCIÓN DE DOCUMENTOS
-CORREO_INSTITUCIONAL = "naylinbeleno03@gmail.com"
+CORREO_INSTITUCIONAL = "convivencia@intesac.edu.co"
 
 # ==============================================================================
 # BASE DE DATOS SQLITE - REPOSITORIO VIRTUAL
@@ -47,7 +47,7 @@ def init_db():
             horario TEXT,
             fecha_hechos TEXT NOT NULL,
             tipo_falta TEXT,
-            ano_lectivo INTEGER NOT NULL,
+            an_lectivo INTEGER NOT NULL,
             contenido_texto TEXT NOT NULL,
             fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -70,7 +70,7 @@ def guardar_registro_db(
 ):
     """Guarda un expediente oficial validado por un directivo."""
     try:
-        ano_actual = datetime.now().year
+        an_actual = datetime.now().year
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute(
@@ -102,7 +102,7 @@ def guardar_registro_db(
 
 
 def consultar_registros_db(
-    busqueda="", ano=None, grado=None, jornada=None, doc_exacto=None
+    busqueda="", an=None, grado=None, jornada=None, doc_exacto=None
 ):
     """Consulta registros en la biblioteca virtual."""
     conn = sqlite3.connect(DB_NAME)
@@ -119,7 +119,7 @@ def consultar_registros_db(
 
         if an and an != "Todos":
             query += " AND an_lectivo = ?"
-            params.append(int(ano))
+            params.append(int(an))
 
         if grado and grado != "Todos":
             query += " AND grado = ?"
@@ -152,18 +152,43 @@ URL_LEY_1620 = "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.
 URL_MANUAL_CONVIVENCIA = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing"
 
 st.set_page_config(
-    page_title="Sistema Integral de Convivencia Escolar - INTESAC",
+    page_title="Sistema Digital de Convivencia Escolar - INTESAC",
     layout="wide",
 )
 
-# Estilos CSS
+# Estilos CSS con mejoras de visibilidad en casillas y barra lateral
 st.markdown(
     """
     <style>
     .stApp { background-color: #F3F4F6; color: #1F2937; font-family: 'Segoe UI', sans-serif; }
-    section[data-testid="stSidebar"] { background-color: #475569; }
+    
+    /* Estilos de la barra lateral */
+    section[data-testid="stSidebar"] { background-color: #334155; }
     section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3,
-    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] a { color: #FFFFFF !important; }
+    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] a { color: #FFFFFF !important; }
+    
+    /* Casillas de texto y entradas visibles con bordes claros */
+    .stTextInput input, .stTextArea textarea, .stSelectbox [data-baseweb="select"] {
+        background-color: #FFFFFF !important;
+        color: #0F172A !important;
+        border: 2px solid #475569 !important;
+        border-radius: 6px !important;
+    }
+    
+    /* Contenido dentro de los expansores en la barra lateral */
+    section[data-testid="stSidebar"] .streamlit-expanderContent div, 
+    section[data-testid="stSidebar"] .streamlit-expanderContent span, 
+    section[data-testid="stSidebar"] .streamlit-expanderContent p, 
+    section[data-testid="stSidebar"] .streamlit-expanderContent a {
+        color: #F1F5F9 !important;
+    }
+
+    /* Controles de cierre de barra lateral con buen contraste */
+    button[kind="header"] {
+        background-color: #334155 !important;
+        color: #FFFFFF !important;
+    }
+
     .header-box { background-color: #0F172A; padding: 22px; border-radius: 12px; border-left: 6px solid #D4AF37; margin-bottom: 20px; }
     .header-box h1 { color: #FFFFFF !important; margin: 0 !important; font-size: 1.65rem !important; }
     .header-box p { color: #E2E8F0 !important; margin-top: 6px !important; }
@@ -175,8 +200,8 @@ st.markdown(
 st.markdown(
     """
     <div class="header-box">
-        <h1>Sistema Integral de Convivencia Escolar</h1>
-        <p>Institución Educativa Técnica Sagrado Corazón de Soledad (6° a 11°)</p>
+        <h1>Sistema Digital de Convivencia Escolar</h1>
+        <p>Institución Educativa Técnica Sagrado Corazón de Soledad (Grados 6° a 11°)</p>
     </div>
 """,
     unsafe_allow_html=True,
@@ -254,7 +279,11 @@ def generar_documento_word(texto_contenido):
             continue
         p = doc.add_paragraph()
         p.paragraph_format.space_after = Pt(4)
-        if "ACTA DE COMPROMISO" in linea.upper() or "REGISTRO" in linea.upper():
+        if (
+            "ACTA DE COMPROMISO" in linea.upper()
+            or "REGISTRO" in linea.upper()
+            or "CARTA" in linea.upper()
+        ):
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run(linea_limpia)
             run.bold = True
@@ -274,9 +303,21 @@ def generar_documento_word(texto_contenido):
     return buffer.getvalue()
 
 
-# BARRA LATERAL CON CONTROL DE ACCESO
+# BARRA LATERAL CON CONTROL DE ACCESO, AVISO Y EXPLICACIÓN DE 3 PASOS
 with st.sidebar:
     st.header("Configuración del Sistema")
+
+    st.markdown(
+        "**Aviso importante:** Si la aplicación tarda entre 30 y 40 segundos"
+        " en cargar, es debido a que el servidor se encontraba en suspensión"
+        " por inactividad. Por favor, espere un momento a que inicie.\n\n"
+        "**Funcionamiento del sistema en 3 pasos:**\n"
+        "1. **Asistencia:** Redacte su borrador con el asistente.\n"
+        "2. **Envío:** Remita el archivo al correo institucional.\n"
+        "3. **Publicación:** El directivo revisa y publica oficialmente."
+    )
+    st.markdown("---")
+
     if not api_key:
         api_key = st.text_input("Clave API de Gemini", type="password")
 
@@ -288,7 +329,7 @@ with st.sidebar:
     autenticado_directivo = False
     if user_role == "Docente / Directivo":
         clave_ingresada = st.text_input(
-            "🔒 Clave de Acceso Directivo:", type="password"
+            "Clave de Acceso Directivo:", type="password"
         )
         if clave_ingresada == CLAVE_DIRECTIVA_CORRECTA:
             autenticado_directivo = True
@@ -313,8 +354,8 @@ SYSTEM_PROMPT = f"""
 Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad (Grados 6° a 11°).
 Perfil actual: {user_role}.
 
-Tu propósito es orientar al usuario en la redacción de sus actas y descargos.
-IMPORTANTE: Aclara al usuario que las actas generadas en este chat son borradores orientativos que deben enviarse al correo institucional ({CORREO_INSTITUCIONAL}) para ser analizadas y posteriormente publicadas por un directivo en la biblioteca oficial.
+Tu propósito es orientar al usuario en la redacción de sus documentos institucionales basándote en el Manual de Convivencia, la Ley 1620 de 2013, la Ley 1098 de 2006 y demás normativas colombianas.
+IMPORTANTE: Aclara al usuario que las actas y documentos generados en este chat son borradores orientativos que deben enviarse al correo institucional ({CORREO_INSTITUCIONAL}) para ser analizados y posteriormente publicados por un directivo en la biblioteca oficial.
 
 DATOS OBLIGATORIOS REQUERIDOS (6° a 11°):
 1. Nombre completo del estudiante
@@ -324,16 +365,21 @@ DATOS OBLIGATORIOS REQUERIDOS (6° a 11°):
 5. Nombre del docente a cargo / reportante
 6. Horario y Fecha exacta de los hechos
 
-Si faltan datos, solicítalos amablemente. Cuando estén completos, genera el reporte con el documento digital formal al final.
+DOCUMENTOS OFICIALES DISPONIBLES QUE PUEDES GENERAR:
+- **ACTA DE COMPROMISO Y CONVIVENCIA ESCOLAR** (Para compromisos académicos y de comportamiento).
+- **MODELO DE CARTA DE DESCARGOS** (Para que el estudiante o acudiente ejerza su derecho a la defensa).
+- **REGISTRO EN EL OBSERVADOR DEL ESTUDIANTE** (Para constancias de seguimiento y llamados de atención).
+
+Si faltan datos, solicítalos amablemente. Cuando estén completos, genera el reporte completo con el documento digital formal al final, incluyendo espacios para firmas.
 """
 
 tab_chat, tab_repositorio = st.tabs(
-    ["💬 Asistente y Generador de Actas", "📚 Biblioteca / Repositorio Virtual"]
+    ["Asistente y Generador de Actas", "Biblioteca / Repositorio Virtual"]
 )
 
 # PESTAÑA 1: CHATBOT (SOLO ASISTENTE Y GENERADOR DE BORRADORES)
 with tab_chat:
-    WELCOME_MESSAGE = f"Saludos. Bienvenido(a) al Sistema Integral de Convivencia Escolar de INTESAC.\n\nSesión iniciada como: **{user_role}**.\n\n*Nota: Este chat orienta y genera su borrador de acta. Para su registro oficial, descargue el archivo Word y envíelo al correo **{CORREO_INSTITUCIONAL}** para validación directiva.*"
+    WELCOME_MESSAGE = f"Saludos. Bienvenido(a) al Sistema Digital de Convivencia Escolar de INTESAC.\n\nSesión iniciada como: **{user_role}**.\n\n*Nota: Este chat orienta y genera su borrador de acta o descargos. Para su registro oficial, descargue el archivo Word y envíelo al correo **{CORREO_INSTITUCIONAL}** para validación directiva.*"
 
     if "messages" not in st.session_state or len(st.session_state.messages) == 0:
         st.session_state.messages = [
@@ -347,20 +393,20 @@ with tab_chat:
                 msg["role"] == "assistant"
                 and idx > 0
                 and HAS_DOCX
-                and "5." in msg["content"]
+                and ("ACTA" in msg["content"].upper() or "CARTA" in msg["content"].upper() or "REGISTRO" in msg["content"].upper())
             ):
                 docx_bytes = generar_documento_word(msg["content"])
                 st.download_button(
-                    label="📄 Descargar Borrador de Acta en Word (.docx)",
+                    label="Descargar Borrador en Word (.docx)",
                     data=docx_bytes,
-                    file_name=f"Borrador_Acta_INTESAC_{idx}.docx",
+                    file_name=f"Borrador_Documento_INTESAC_{idx}.docx",
                     mime=(
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     ),
                     key=f"dl_word_{idx}",
                 )
                 st.info(
-                    f"📩 Una vez completado, envíe este documento al correo"
+                    f"Una vez completado, envíe este documento al correo"
                     f" **{CORREO_INSTITUCIONAL}** para revisión por parte de"
                     " Coordinación."
                 )
@@ -385,7 +431,7 @@ with tab_chat:
 
             with st.spinner("Procesando información..."):
                 response = client.models.generate_content(
-                    model="gemini-3.6-flash",
+                    model="gemini-2.5-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=SYSTEM_PROMPT, temperature=0.2
@@ -401,19 +447,19 @@ with tab_chat:
 
 # PESTAÑA 2: REPOSITORIO VIRTUAL (PUBLICACIÓN EXCLUSIVA DE DIRECTIVOS)
 with tab_repositorio:
-    st.subheader("📚 Repositorio Digital de Seguimiento Disciplinario")
+    st.subheader("Repositorio Digital de Seguimiento Disciplinario")
 
     # PERMISO DOCENTE / DIRECTIVO (PUBLICACIÓN Y GESTIÓN OFICIAL)
     if user_role == "Docente / Directivo":
         if autenticado_directivo:
             st.info(
-                "🔓 **Modulo de Publicación Directiva:** Revisa, aprueba y"
-                " publica actas oficiales en la biblioteca institucional."
+                "Módulo de Publicación Directiva: Revisa, aprueba y publica"
+                " documentos y actas oficiales en la biblioteca institucional."
             )
 
             # Formulario exclusivo de publicación oficial
             with st.expander(
-                "➕ Publicar Acta Oficial Analizada en la Biblioteca"
+                "Publicar Documento u Acta Oficial Analizada en la Biblioteca"
             ):
                 with st.form("form_registro"):
                     col_a, col_b = st.columns(2)
@@ -445,15 +491,16 @@ with tab_repositorio:
                                 "Situación Tipo I (Leve)",
                                 "Situación Tipo II (Grave)",
                                 "Situación Tipo III (Gravísima)",
+                                "Carta de Descargos / Trámite",
                             ],
                         )
 
                     f_texto = st.text_area(
-                        "Contenido definitivo del Acta / Resolución"
+                        "Contenido definitivo del Documento / Acta / Resolución"
                     )
 
                     if st.form_submit_button(
-                        "📌 Publicar Oficialmente en Biblioteca"
+                        "Publicar Oficialmente en Biblioteca"
                     ):
                         if f_nombre and f_doc and f_texto:
                             guardar_registro_db(
@@ -469,21 +516,21 @@ with tab_repositorio:
                                 f_texto,
                             )
                             st.success(
-                                f"✅ Acta de {f_nombre} publicada"
-                                " exitosamente en la biblioteca digital."
+                                f"Documento de {f_nombre} publicado exitosamente en"
+                                " la biblioteca digital."
                             )
                             st.rerun()
 
             st.markdown("---")
-
             # Filtros de Búsqueda
             col_b1, col_b2, col_b3, col_b4 = st.columns([2, 1, 1, 1])
             with col_b1:
                 search_txt = st.text_input(
-                    "🔍 Buscar por Estudiante, Documento o Docente:"
+                    "Buscar por nombre de estudiante o documento de"
+                    " identidad:"
                 )
             with col_b2:
-                f_ano = st.selectbox(
+                f_an = st.selectbox(
                     "Año Lectivo:", ["Todos", "2026", "2025", "2024"], index=1
                 )
             with col_b3:
@@ -497,20 +544,20 @@ with tab_repositorio:
 
             df_registros = consultar_registros_db(
                 busqueda=search_txt,
-                ano=f_ano,
+                an=f_an,
                 grado=f_grado_sel,
                 jornada=f_jornada_sel,
             )
 
             if not df_registros.empty:
                 st.markdown(
-                    f"**Se encontraron {len(df_registros)} acta(s) publicada(s):**"
+                    f"**Se encontraron {len(df_registros)} documento(s) publicado(s):**"
                 )
                 for index, row in df_registros.iterrows():
                     with st.expander(
-                        f"📄 [{row['ano_lectivo']}] Grado {row['grado']} ("
-                        f"Jornada {row['jornada']}) — {row['estudiante_nombre']}"
-                        f" ({row['estudiante_documento']})"
+                        f"[{row['an_lectivo']}] Grado {row['grado']} (Jornada"
+                        f" {row['jornada']}) — {row['estudiante_nombre']} ("
+                        f"{row['estudiante_documento']})"
                     ):
                         st.write(f"**Evaluador/Docente:** {row['docente']}")
                         st.write(
@@ -523,31 +570,30 @@ with tab_repositorio:
                                 row["contenido_texto"]
                             )
                             st.download_button(
-                                label="📄 Descargar Acta Word (.docx)",
+                                label="Descargar Documento Word (.docx)",
                                 data=doc_bytes,
                                 file_name=(
-                                    f"Acta_Oficial_{row['estudiante_documento']}.docx"
+                                    f"Documento_Oficial_{row['estudiante_documento']}.docx"
                                 ),
                                 mime=(
                                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            ),
+                                ),
                                 key=f"dl_db_{row['id']}",
                             )
             else:
                 st.info(
-                    "No hay actas publicadas que coincidan con los filtros."
+                    "No hay documentos publicados que coincidan con los filtros."
                 )
         else:
             st.warning(
-                "🔒 **Acceso Restringido:** Ingrese la clave de acceso"
-                " directivo en la barra lateral para gestionar la biblioteca"
-                " oficial."
+                "Acceso Restringido: Ingrese la clave de acceso directivo en la"
+                " barra lateral para gestionar la biblioteca oficial."
             )
 
     # PERMISO ESTUDIANTE / ACUDIENTE (CONSULTA DE ACTAS PUBLICADAS)
     else:
         st.info(
-            "🔎 **Consulta de Estado de Convivencia:** Ingrese su Tarjeta de"
+            "Consulta de Estado de Convivencia: Ingrese su Tarjeta de"
             " Identidad para consultar si la coordinación ha publicado un acta"
             " oficial correspondiente a su caso."
         )
@@ -564,13 +610,13 @@ with tab_repositorio:
 
             if not df_mis_registros.empty:
                 st.warning(
-                    f"⚠️ Se encontraron {len(df_mis_registros)} acta(s) oficiales"
-                    " publicadas en el sistema:"
+                    f"Se encontraron {len(df_mis_registros)} documento(s) oficial(es)"
+                    " publicado(s) en el sistema:"
                 )
 
                 for index, row in df_mis_registros.iterrows():
                     with st.expander(
-                        f"📄 Acta Oficial [{row['ano_lectivo']}] — Grado"
+                        f"Documento Oficial [{row['an_lectivo']}] — Grado"
                         f" {row['grado']} ({row['jornada']}) | Fecha:"
                         f" {row['fecha_hechos']}"
                     ):
@@ -585,12 +631,10 @@ with tab_repositorio:
                                 row["contenido_texto"]
                             )
                             st.download_button(
-                                label=(
-                                    "📄 Descargar Acta Oficial en Word (.docx)"
-                                ),
+                                label="Descargar Documento Oficial en Word (.docx)",
                                 data=doc_bytes,
                                 file_name=(
-                                    f"Acta_Oficial_{row['estudiante_documento']}.docx"
+                                    f"Documento_Oficial_{row['estudiante_documento']}.docx"
                                 ),
                                 mime=(
                                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -599,8 +643,8 @@ with tab_repositorio:
                             )
             else:
                 st.success(
-                    f"✅ **Sin registros pendientes:** No se encontraron actas"
-                    " oficiales publicadas asociadas a la Tarjeta de Identidad"
+                    f"Sin registros pendientes: No se encontraron documentos"
+                    " oficiales publicados asociados a la Tarjeta de Identidad"
                     f" N.° **{doc_estudiante_input}**. Tu historial de"
                     " convivencia escolar se encuentra totalmente limpio."
                 )
