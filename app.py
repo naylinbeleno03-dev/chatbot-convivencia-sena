@@ -54,7 +54,7 @@ def init_db():
     """)
     conn.commit()
     conn.close()
-    def guardar_registro_db(
+def guardar_registro_db(
     nombre,
     documento,
     grado,
