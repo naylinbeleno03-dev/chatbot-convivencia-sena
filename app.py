@@ -225,7 +225,7 @@ st.markdown(
 st.markdown(
     """
     <div class="header-box">
-        <h1>Sistema Digital de Convivencia Escolar</h1>
+        <h1>Sistema Integral de Convivencia Escolar</h1>
         <p>Institución Educativa Técnica Sagrado Corazón</p>
     </div>
 """,
