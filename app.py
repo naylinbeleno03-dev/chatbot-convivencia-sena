@@ -33,7 +33,7 @@ URL_MANUAL_CONVIVENCIA = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga
 
 # Configuración inicial de la página
 st.set_page_config(
-    page_title="Sistema Integral de Convivencia Escolar - Institución Educativa Técnica Sagrado Corazón",
+    page_title="Sistema Digital de Convivencia Escolar - Institución Educativa Técnica Sagrado Corazón",
     layout="centered",
 )
 
@@ -237,12 +237,12 @@ api_key = st.secrets.get("GEMINI_API_KEY", "")
 
 
 def limpiar_texto_para_word(texto: str) -> str:
-    """Limpia guiones, viñetas, caracteres de markdown y líneas divisorias."""
+    """Limpia guiones, viñetas de markdown y líneas divisorias."""
     if not texto:
         return ""
     # Eliminar líneas divisorias (---, ***)
     texto = re.sub(r"^[-\*_]{3,}\s*$", "", texto, flags=re.MULTILINE)
-    # Eliminar guiones o asteriscos de inicio de línea (viñetas)
+    # Eliminar viñetas de markdown al inicio de línea
     texto = re.sub(r"^\s*[-\*]\s+", "", texto, flags=re.MULTILINE)
     # Eliminar guiones dobles
     texto = re.sub(r"-{2,}", "", texto)
@@ -255,6 +255,7 @@ def extraer_solo_documento(texto_contenido: str) -> str:
         return ""
 
     patrones = [
+        r"(ACTA DE COMPROMISO.*)",
         r"(MODELO DE CARTA.*)",
         r"(MODELO DE REGISTRO.*)",
         r"(CARTA DE DESCARGOS.*)",
@@ -262,6 +263,7 @@ def extraer_solo_documento(texto_contenido: str) -> str:
         r"(CITACIÓN A ACUDIENTE.*)",
         r"(5\.\s*MODELO.*)",
         r"(5\.\s*DOCUMENTO.*)",
+        r"(5\.\s*ACTA.*)",
     ]
 
     for patron in patrones:
@@ -270,7 +272,7 @@ def extraer_solo_documento(texto_contenido: str) -> str:
             texto_extraido = match.group(1)
             lineas = texto_extraido.split("\n")
             if re.match(
-                r"^5\.\s*(MODELO|DOCUMENTO|PLANTILLA)",
+                r"^5\.\s*(MODELO|DOCUMENTO|PLANTILLA|ACTA)",
                 lineas[0].strip(),
                 re.IGNORECASE,
             ):
@@ -284,7 +286,7 @@ def extraer_solo_documento(texto_contenido: str) -> str:
 def generar_documento_word(texto_contenido):
     doc = Document()
 
-    # Extraer estrictamente solo el modelo de carta/documento para el archivo digital
+    # Extraer estrictamente solo la plantilla formal para la biblioteca digital
     texto_documento = extraer_solo_documento(texto_contenido)
 
     # Configuración de página y secciones
@@ -294,13 +296,12 @@ def generar_documento_word(texto_contenido):
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-        # 1. ENCABEZADO (Esquina superior derecha, pequeño)
+        # 1. ENCABEZADO INSTITUCIONAL (Esquina superior derecha, discreto)
         header = section.header
         p_head = header.paragraphs[0]
         p_head.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         p_head.paragraph_format.space_after = Pt(0)
 
-        # Imagen pequeña en el encabezado si existe en el directorio
         posibles_nombres_imagen = [
             "escudo.png",
             "escudo.jpg",
@@ -356,29 +357,33 @@ def generar_documento_word(texto_contenido):
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
 
-        # Detectar si la línea es un título o subtítulo
+        # Formato para el título principal del documento
         if (
             linea.strip().startswith("#")
             or (
                 linea.strip().startswith("**")
                 and linea.strip().endswith("**")
             )
-            or "MODELO" in linea.upper()
-            or "CARTA" in linea.upper()
-            or "DESCARGOS" in linea.upper()
-            or "OBSERVADOR" in linea.upper()
-            or "CITACIÓN" in linea.upper()
+            or "ACTA DE COMPROMISO" in linea.upper()
+            or "MODELO DE CARTA" in linea.upper()
+            or "CARTA DE DESCARGOS" in linea.upper()
+            or "MODELO DE REGISTRO" in linea.upper()
         ):
 
             texto_titulo = linea_limpia.replace("#", "").replace("**", "")
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run(texto_titulo)
             run.bold = True
-            run.font.size = Pt(11)
+            run.font.size = Pt(12)
             run.font.name = "Arial"
             run.font.color.rgb = RGBColor(15, 23, 42)
-            p.paragraph_format.space_before = Pt(6)
+            p.paragraph_format.space_before = Pt(8)
+            p.paragraph_format.space_after = Pt(10)
         else:
-            # Separar fragmentos con negritas implícitas (**texto**)
+            # Alineación justificada para el cuerpo
+            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+
+            # Formato moderado de negritas evitando saturación
             partes = re.split(r"(\*\*.*?\*\*)", linea_limpia)
             for parte in partes:
                 if parte.startswith("**") and parte.endswith("**"):
@@ -464,25 +469,36 @@ Estás orientando a un usuario con el perfil de: {user_role}.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de la Institución Educativa Técnica Sagrado Corazón.
 
-Instrucciones strictly obligatorias de formato y contenido:
-- Este sistema es 100% digital para el archivo y repositorio institucional. Queda ESTRICTAMENTE PROHIBIDO mencionar que el documento debe ser impreso, firmado en papel o presentado en físico.
-- Bajo ninguna circunstancia utilices emojis, emoticones, viñetas con guiones ni símbolos gráficos decorativos. Mantén un formato totalmente sobrio, formal, profesional y estructurado con títulos y subtítulos claros en negrita.
-- NO utilices guiones ni asteriscos al inicio de párrafo. Redacta párrafos completos e integrales.
-- NO solicites ni incluyas campos de teléfono de contacto ni correo electrónico en las plantillas o modelos de documentos.
-- Utiliza campos de subrayado limpio (ejemplo: ______________________) para la información editable digitalmente por parte del estudiante, acudiente o docente.
-- Indica explícitamente en la sección del documento que la plantilla generada incluye el membrete de la Institución Educativa Técnica Sagrado Corazón para ser guardada en Microsoft Word y archivada digitalmente.
+Instrucciones estrictamente obligatorias de formato y contenido para la plantilla digital:
+- Este sistema es 100% digital para el archivo y repositorio institucional por año escolar. Queda ESTRICTAMENTE PROHIBIDO mencionar que el documento debe ser impreso, firmado en papel o presentado en físico.
+- NO repitas innecesariamente el nombre de la institución en el cuerpo del documento.
+- NO repitas continuamente el nombre del estudiante. Utiliza un párrafo inicial con líneas de subrayado para diligenciar los datos principales (`____________________`).
+- Limita el uso de negritas. NO recargues el texto en negrita; mantén la redacción en texto normal, usando negritas únicamente para el título principal y las etiquetas de firmas.
+- Utiliza subrayados limpios (`____________________`) para los campos editables digitalmente.
+- Incluye al final del documento un bloque formal de firmas de acuerdo con el estilo institucional:
+  
+  ____________________________________
+  Firma del Estudiante
+  Documento de Identidad N.° ____________________
+
+  ____________________________________
+  Firma del Acudiente / Representante Legal
+  Documento de Identidad N.° ____________________
+
+  ____________________________________
+  Firma de Coordinación / Docente
 
 Ante cada caso expuesto por el usuario:
 1. Resumen de la situación: Presenta una síntesis objetiva de los hechos reportados.
 2. Clasificación de la falta (Según el Manual de Convivencia y Ley 1620 de 2013):
-   - Situación Tipo I (Leve): Conflictos manejados inadecuadamente o faltas menores a los deberes (incluye presentación personal, exceso de maquillaje, corte de cabello no acorde al manual, uso de accesorios no permitidos, impuntualidad, fraude menor, desacato leve).
-   - Situación Tipo II (Grave): Situaciones de acoso escolar (bullying), ciberacoso, agresiones físicas/verbales sin incapacidad médica o porte de elementos no autorizados como vapeadores.
-   - Situación Tipo III (Gravísima): Presuntos delitos penales, agresiones físicas con incapacidad, porte de armas u objetos peligrosos.
-3. Procedimiento institucional: Detalla el protocolo a aplicar según el nivel de falta (llamado de atención verbal, registro en el observador, citación a acudientes o remisión al Comité de Convivencia).
-4. Garantías y Debido Proceso: Indica los derechos aplicables protegidos por el Artículo 29 de la Constitución Política y el Código de Infancia y Adolescencia (derecho a ser escuchado, presunción de inocencia, presentación de pruebas y descargos).
-5. Documento / Plantilla Sugerida (Para Microsoft Word):
-   - Si el perfil es Estudiante o Acudiente: Inicia con el título exacto "MODELO DE CARTA DE DESCARGOS ESTUDIANTIL" y redacta la carta dirigida a la Coordinación o Rectoría (omitiendo teléfono y correo electrónico) adaptada con subrayados (______________) para ser diligenciada digitalmente.
-   - Si el perfil es Docente / Directivo: Inicia con el título exacto "MODELO DE REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" y redacta el modelo (omitiendo teléfono y correo electrónico) adaptado con subrayados (______________) para ser diligenciado digitalmente.
+   - Situación Tipo I (Leve): Conflictos manejados inadecuadamente o faltas menores a los deberes.
+   - Situación Tipo II (Grave): Situaciones de acoso escolar (bullying), ciberacoso o agresiones físicas/verbales sin incapacidad médica.
+   - Situación Tipo III (Gravísima): Presuntos delitos penales o agresiones físicas con incapacidad médica.
+3. Procedimiento institucional: Detalla el protocolo a aplicar según el nivel de falta.
+4. Garantías y Debido Proceso: Indica los derechos aplicables protegidos por el Artículo 29 de la Constitución Política.
+5. Modelo de Documento Digital Sugerido:
+   - Si el perfil es Estudiante o Acudiente: Inicia con el título exacto "ACTA DE COMPROMISO Y CARTA DE DESCARGOS ESTUDIANTIL" y redacta el modelo estructurado de manera limpia, sin negritas excesivas y con el bloque de firmas al final.
+   - Si el perfil es Docente / Directivo: Inicia con el título exacto "MODELO DE REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" y redacta el modelo de manera limpia con el bloque de firmas al final.
 """
 
 WELCOME_MESSAGE = f"""
@@ -501,7 +517,7 @@ if "messages" not in st.session_state or len(st.session_state.messages) == 0:
         {"role": "assistant", "content": WELCOME_MESSAGE}
     ]
 
-# Renderizar historial de mensajes y botón de descarga permanente para cada respuesta de la IA
+# Renderizar historial de mensajes y botón de descarga para cada respuesta del asistente
 for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
