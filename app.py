@@ -287,7 +287,7 @@ def extraer_solo_documento(texto_contenido: str) -> str:
 def generar_documento_word(texto_contenido):
     doc = Document()
 
-    # Extraer estrictamente solo la plantilla formal para la biblioteca digital
+    # Extraer strictly solo la plantilla formal para la biblioteca digital
     texto_documento = extraer_solo_documento(texto_contenido)
 
     # Configuración de página y secciones
@@ -538,7 +538,7 @@ Ante cada caso expuesto por el usuario:
 """
 
 WELCOME_MESSAGE = f"""
-Saludos. Bienvenido al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón.
+Saludos. Bienvenido(a) al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón.
 
 Sesión iniciada como: **{user_role}**.
 
@@ -553,7 +553,7 @@ if "messages" not in st.session_state or len(st.session_state.messages) == 0:
         {"role": "assistant", "content": WELCOME_MESSAGE}
     ]
 
-# Renderizar historial de mensajes y botón de descarga permanente para cada respuesta del asistente
+# Renderizar historial de mensajes y botón de descarga para cada respuesta del asistente
 for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
@@ -655,4 +655,12 @@ if prompt:
                 st.rerun()
 
     except Exception as e:
-        st.error(f"Error de comunicación con el servicio: {e}")
+        error_msg = str(e)
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+            st.warning(
+                "⚠️ El servicio ha alcanzado el límite de consultas por minuto"
+                " de la capa gratuita. Por favor, espere 30 a 40 segundos e"
+                " intente de nuevo."
+            )
+        else:
+            st.error(f"Error de comunicación con el servicio: {e}")
