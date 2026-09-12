@@ -33,7 +33,7 @@ URL_MANUAL_CONVIVENCIA = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga
 
 # Configuración inicial de la página
 st.set_page_config(
-    page_title="Sistema Digital de Convivencia Escolar - Institución Educativa Técnica Sagrado Corazón",
+    page_title="Sistema Integral de Convivencia Escolar - Institución Educativa Técnica Sagrado Corazón",
     layout="centered",
 )
 
