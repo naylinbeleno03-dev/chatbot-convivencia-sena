@@ -1,3 +1,15 @@
+import streamlit as st
+from repositorio import render_repositorio_tab
+
+# Configurar pestañas principales en tu app
+tab_asistente, tab_repositorio = st.tabs(["Asistente y Reportes", "Repositorio Institucional"])
+
+with tab_asistente:
+    # Aquí va todo el código largo del asistente que me pasaste antes
+    ...
+
+with tab_repositorio:
+    render_repositorio_tab()
 import hashlib
 import io
 import os
