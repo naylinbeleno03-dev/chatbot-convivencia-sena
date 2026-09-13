@@ -493,7 +493,7 @@ Para poder generar el reporte y el documento digital oficial completo, se requie
 1. Nombre completo del estudiante
 2. Número de documento de identidad del estudiante
 3. Grado y curso del estudiante
-4. Asignatura / Clase en la que ocurrió el incidente
+4. Asignatura / Clase en la que ocurrió el incidente(o si fue en la entrada a clases, recreo o salida)
 5. Nombre completo del docente a cargo / reportante
 6. Horario o Rango de horas en que sucedió
 7. Fecha exacta de los hechos
