@@ -530,7 +530,7 @@ Estructura de la respuesta cuando los datos están completos (5 PUNTOS):
    - Si el perfil es Docente / Directivo: Inicia con "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA ESCOLAR" incorporando al inicio los datos de la novedad y la descripción de los hechos con compromisos numerados.
 
 Bloque final de firmas para el documento digital (ÚNICO LUGAR CON SUBRAYADOS):
-  Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
+    Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
 
 
 
