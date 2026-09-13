@@ -565,8 +565,16 @@ for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-        # Generación del botón de descarga directa en Word para los mensajes del asistente
-        if msg["role"] == "assistant" and idx > 0:
+        # Generación del botón de descarga directa en Word únicamente cuando la respuesta contenga el documento oficial al finalizar
+        if (
+            msg["role"] == "assistant"
+            and idx > 0
+            and (
+                "ACTA DE COMPROMISO" in msg["content"]
+                or "REGISTRO EN EL OBSERVADOR" in msg["content"]
+                or "MODELO DE DOCUMENTO" in msg["content"]
+            )
+        ):
             if HAS_DOCX:
                 docx_bytes = generar_documento_word(msg["content"])
                 st.download_button(
