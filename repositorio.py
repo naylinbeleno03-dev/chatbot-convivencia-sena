@@ -169,6 +169,9 @@ if seccion_actual == "🤖 Asistente de Convivencia":
     Asegura el cumplimiento del debido proceso (Art. 29 Constitución Política), Ley 115, Ley 1098, Ley 1620 y el Manual de Convivencia.
     Datos requeridos obligatoriamente: 1. Nombre completo, 2. Documento de identidad, 3. Grado/curso, 4. Asignatura, 5. Docente a cargo, 6. Horario, 7. Fecha exacta.
     Si faltan datos, solicítalos amablemente. Si están completos, genera la asesoría estructurada en 5 puntos y la plantilla formal.
+    
+    IMPORTANTE: Cuando ya tengas todos los datos y generes el informe final, incluye al final una línea discreta con el formato exacto de metadatos para el registro automático en la base de datos:
+    [REGISTRO_DB | Nombre: ... | Documento: ... | Grado: ... | Asignatura: ... | Docente: ... | Horario: ... | Fecha: ... | TipoFalta: ...]
     """
 
     WELCOME_MESSAGE = f"""
@@ -183,7 +186,6 @@ if seccion_actual == "🤖 Asistente de Convivencia":
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
             if msg["role"] == "assistant" and idx > 0 and HAS_DOCX:
-                # Opcional: Lógica de descarga de Word
                 pass
 
     user_input = st.chat_input("Escriba los detalles de la situación...")
@@ -201,7 +203,48 @@ if seccion_actual == "🤖 Asistente de Convivencia":
                 config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT, temperature=0.2),
             )
             if response and response.text:
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
+                texto_respuesta = response.text
+                
+                # Detectar si el asistente generó el bloque de metadatos para guardarlo automáticamente en SQLite
+                match_db = re.search(r"\[REGISTRO_DB\s*\|\s*(.*?)\]", texto_respuesta, re.IGNORECASE)
+                if match_db:
+                    try:
+                        datos_str = match_db.group(1)
+                        partes = [p.strip() for p in datos_str.split("|")]
+                        d_dict = {}
+                        for p in partes:
+                            if ":" in p:
+                                k, v = p.split(":", 1)
+                                d_dict[k.strip().lower()] = v.strip()
+                        
+                        guardar_registro_db(
+                            nombre=d_dict.get("nombre", "Estudiante No Especificado"),
+                            documento=d_dict.get("documento", "S/N"),
+                            grado=d_dict.get("grado", "General"),
+                            jornada="Mañana",
+                            asignatura=d_dict.get("asignatura", "General"),
+                            docente=d_dict.get("docente", "Docente General"),
+                            horario=d_dict.get("horario", "Jornada escolar"),
+                            fecha=d_dict.get("fecha", datetime.now().strftime("%Y-%m-%d")),
+                            tipo_falta=d_dict.get("tipofalta", "Situación Tipo I"),
+                            contenido=texto_respuesta
+                        )
+                    except Exception:
+                        # Fallback si ocurre algún error menor en la extracción
+                        guardar_registro_db(
+                            nombre="Registro Convivencia",
+                            documento="000000",
+                            grado="General",
+                            jornada="Mañana",
+                            asignatura="General",
+                            docente="Docente",
+                            horario="General",
+                            fecha=datetime.now().strftime("%Y-%m-%d"),
+                            tipo_falta="Revisión",
+                            contenido=texto_respuesta
+                        )
+
+                st.session_state.messages.append({"role": "assistant", "content": texto_respuesta})
                 st.rerun()
         except Exception as e:
             st.error(f"Error: {e}")
@@ -218,7 +261,6 @@ elif seccion_actual == "📚 Repositorio y Archivo Histórico":
     with col_f1:
         filtro_texto = st.text_input("Buscar por nombre, documento o docente:", "")
     with col_f2:
-        # Extraer años disponibles en la BD
         conn_db = sqlite3.connect(DB_NAME)
         anos_disponibles = pd.read_sql_query("SELECT DISTINCT an_lectivo FROM registros_convivencia ORDER BY an_lectivo DESC", conn_db)
         conn_db.close()
@@ -244,4 +286,4 @@ elif seccion_actual == "📚 Repositorio y Archivo Histórico":
                 st.markdown("---")
                 st.text_area("Contenido del Acta / Expediente:", row['contenido_texto'], height=150, key=f"txt_repo_{row['id']}")
     else:
-        st.info("No se encontraron registros en el repositorio con los filtros seleccionados.")
+      st.info("No se encontraron registros en el repositorio con los filtros seleccionados.")
