@@ -517,6 +517,10 @@ with st.sidebar:
     if st.button("Reiniciar consulta de chat"):
         st.session_state.messages = []
         st.rerun()
+        section[data-testid="stSidebar"] .stButton>button p,
+section[data-testid="stSidebar"] .stButton>button span {
+    color: #1F2937 !important;
+}
 
 # Pestañas principales de navegación unificadas
 tab_chat, tab_repositorio = st.tabs(
