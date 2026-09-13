@@ -21,8 +21,8 @@ except ImportError:
     HAS_DOCX = False
 
 # CLAVE MAESTRA Y SEGURIDAD PARA DOCENTES / DIRECTIVOS
-CLAVE_DIRECTIVA_CORRECTA = st.secrets.get("CLAVE_DOCENTE", "INTESAC2026")
-CORREO_INSTITUCIONAL = "convivencia@intesac.edu.co"
+CLAVE_DIRECTIVA_CORRECTA = st.secrets.get("CLAVE_DOCENTE", "1NTESACsoledad0315")
+CORREO_INSTITUCIONAL = "naylinbeleno03@gmail.com"
 
 # ==============================================================================
 # BASE DE DATOS SQLITE - REPOSITORIO VIRTUAL SEGURO E INSTITUCIONAL
@@ -704,7 +704,7 @@ with tab_chat:
 
             with st.spinner("Procesando información institucional..."):
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.6-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=SYSTEM_PROMPT, temperature=0.2
@@ -842,7 +842,7 @@ with tab_repositorio:
         )
     with col_f4:
         filtro_b = st.text_input(
-            "Buscar (Estudiante / Documento / Docente):", ""
+            "Buscar (Nombre estudiante / Num. Identificación del estudiante):", ""
         )
 
     # Consulta unificada compatible con ambos flujos de datos
