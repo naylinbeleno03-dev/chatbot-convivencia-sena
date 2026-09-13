@@ -514,14 +514,39 @@ with st.sidebar:
     st.markdown("2. El sistema categorizará el hecho y el protocolo.")
     st.markdown("3. Se generará la plantilla oficial descargable en Word.")
 
-    if st.button("Reiniciar consulta de chat"):
-        st.session_state.messages = []
-        st.rerun()
-        section[data-testid="stSidebar"] .stButton>button p,
-section[data-testid="stSidebar"] .stButton>button span {
-    color: #1F2937 !important;
-}
+# 1. El bloque de estilos CSS (va dentro de tu st.markdown con <style>)
+st.markdown(
+    """
+    <style>
+    /* Estilos generales de la barra lateral y botones */
+    section[data-testid="stSidebar"] .stButton>button {
+        background-color: #FFFFFF !important;
+        color: #1F2937 !important;
+        border: 1px solid #FFFFFF !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        width: 100%;
+    }
+    
+    /* Esto es lo que fuerza a que el texto del botón se vea oscuro y no en blanco */
+    section[data-testid="stSidebar"] .stButton>button p,
+    section[data-testid="stSidebar"] .stButton>button span {
+        color: #1F2937 !important;
+    }
 
+    section[data-testid="stSidebar"] .stButton>button:hover {
+        background-color: #E2E8F0 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# 2. El botón en tu barra lateral (cerca de la línea 520, fuera del HTML)
+if st.button("Reiniciar consulta de chat"):
+  st.session_state.messages = []
+  st.rerun()
 # Pestañas principales de navegación unificadas
 tab_chat, tab_repositorio = st.tabs(
     ["Asistente y Generador de Casos", "Biblioteca y Repositorio Virtual"]
