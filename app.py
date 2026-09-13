@@ -671,7 +671,7 @@ with tab_repositorio:
     )
   with col_f2:
     filtro_b = st.text_input(
-        "Buscar por Nombre del Estudiante, o Número de Identificación:", ""
+        "Buscar por Nombre del Estudiante o Número de Identificación:", ""
     )
 
   registros = consultar_registros_db(
