@@ -122,7 +122,7 @@ st.set_page_config(
     layout="centered",
 )
 
-# Estilos CSS personalizados (Corregido el color de texto en botones del sidebar)
+# Estilos CSS personalizados
 st.markdown(
     """
     <style>
@@ -188,7 +188,6 @@ st.markdown(
         font-weight: 600 !important;
         width: 100%;
     }
-    /* CORRECCIÓN: Forzar color oscuro en todos los elementos internos del botón del sidebar */
     section[data-testid="stSidebar"] .stButton>button *,
     section[data-testid="stSidebar"] .stButton>button p,
     section[data-testid="stSidebar"] .stButton>button span {
@@ -196,11 +195,6 @@ st.markdown(
     }
     section[data-testid="stSidebar"] .stButton>button:hover {
         background-color: #E2E8F0 !important;
-    }
-    section[data-testid="stSidebar"] .stButton>button:hover *,
-    section[data-testid="stSidebar"] .stButton>button:hover p,
-    section[data-testid="stSidebar"] .stButton>button:hover span {
-        color: #0F172A !important;
     }
     .stMainBlockContainer div.stButton > button {
         background-color: #FFFFFF !important;
@@ -378,7 +372,7 @@ def generar_documento_word(texto_contenido):
       run = p.add_run(linea_limpia.replace("**", ""))
       run.font.size = Pt(10)
       run.font.name = "Arial"
-      run.font.bold = "FIRMA" in linea.upper()
+      run.font.bold = "FIRMA" in linea.upper() or "ESTUDIANTE" in linea.upper() or "ACUDIENTE" in linea.upper() or "DOCENTE" in linea.upper()
       run.font.color.rgb = RGBColor(31, 41, 55)
       if "________________" in linea:
         p.paragraph_format.space_before = Pt(36)
@@ -463,7 +457,11 @@ with tab_chat:
   SYSTEM_PROMPT = f"""
     Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
     Estás orientando a un usuario con el perfil de: {user_role}.
-    Tu propósito es asesorar formal y pedagógicamente ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política (Art. 29), Ley 115, Ley 1098, Ley 1620, Decreto 1965 y el Manual de Convivencia.
+    Tu propósito es asesorar formal y pedagógicamente ante situaciones disciplinarias, asegurando el cumplimiento estricto de la Constitución Política (Art. 29), Ley 115, Ley 1098, Ley 1620, Decreto 1965 y el Manual de Convivencia.
+
+    REGLAS DE CONOCIMIENTO Y LENGUAJE:
+    - Tú conoces a fondo el Manual de Convivencia institucional. NUNCA utilices expresiones condicionales, dudosas o evasivas como "si aplica", "si el Manual contempla", "dependiendo de lo que diga el manual". Afirma de forma directa, certera y categórica las normas, protocolos y medidas disciplinarias establecidas.
+    - NO repitas innecesariamente el nombre de la institución ni utilices exceso de negritas en el texto o en el documento final. Mantén una redacción limpia, fluida y profesional.
 
     Reglas interactivas OBLIGATORIAS de recolección de datos (Se requieren los 7 datos completos):
     1. Nombre completo del estudiante
@@ -483,7 +481,19 @@ with tab_chat:
     2. Clasificación de la falta (Tipo I Leve, Tipo II Grave, Tipo III Gravísima según Ley 1620).
     3. Procedimiento institucional.
     4. Garantías y Debido Proceso (Art. 29).
-    5. Modelo de Documento Digital Sugerido (Iniciando con "ACTA DE COMPROMISO Y DESCARGOS" o "REGISTRO EN EL OBSERVADOR").
+    5. Modelo de Documento Digital Sugerido (Iniciando con "ACTA DE COMPROMISO DEL ESTUDIANTE" o "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA ESCOLAR"). 
+       El bloque final de firmas debe ser limpio y estructurado exactamente así:
+
+       Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
+
+
+       ________________________________________          ________________________________________
+       Firma del Estudiante                              Firma del Acudiente / Representante Legal
+       Documento N.° [Documento suministrado]            Documento N.° ____________________
+
+
+       ________________________________________
+       Firma del Docente Reportante / Coordinación
     """
 
   WELCOME_MESSAGE = f"""
@@ -501,31 +511,34 @@ with tab_chat:
   for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
       st.markdown(msg["content"])
+      # Condición estricta: Mostrar el botón de descarga ÚNICAMENTE en el mensaje final que contiene la asesoría completa y la plantilla (5 PUNTOS o ACTA/OBSERVADOR)
       if msg["role"] == "assistant" and idx > 0:
-        content_hash = hashlib.md5(msg["content"].encode("utf-8")).hexdigest()[
-            :8
-        ]
-        if HAS_DOCX:
-          docx_bytes = generar_documento_word(msg["content"])
-          st.download_button(
-              label=(
-                  "📄 Descargar Documento Oficial en Microsoft Word (.docx)"
-              ),
-              data=docx_bytes,
-              file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.docx",
-              mime=(
-                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              ),
-              key=f"dl_word_{idx}_{content_hash}",
-          )
-        else:
-          st.download_button(
-              label="📄 Guardar texto (.txt)",
-              data=msg["content"],
-              file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
-              mime="text/plain",
-              key=f"dl_txt_{idx}_{content_hash}",
-          )
+        texto_msg = msg["content"].upper()
+        if "5." in texto_msg or "ACTA" in texto_msg or "OBSERVADOR" in texto_msg:
+          content_hash = hashlib.md5(msg["content"].encode("utf-8"))[
+              :8
+          ]
+          if HAS_DOCX:
+            docx_bytes = generar_documento_word(msg["content"])
+            st.download_button(
+                label=(
+                    "📄 Descargar Documento Oficial en Microsoft Word (.docx)"
+                ),
+                data=docx_bytes,
+                file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.docx",
+                mime=(
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                ),
+                key=f"dl_word_{idx}_{content_hash}",
+            )
+          else:
+            st.download_button(
+                label="📄 Guardar texto (.txt)",
+                data=msg["content"],
+                file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
+                mime="text/plain",
+                key=f"dl_txt_{idx}_{content_hash}",
+            )
 
   # Botones rápidos
   selected_option = None
@@ -621,12 +634,10 @@ with tab_chat:
               {"role": "assistant", "content": respuesta_texto}
           )
 
-          # Si la respuesta ya incluye el documento completo (tiene 5 puntos o acta), lo guardamos automáticamente en la BD
           if (
               "ACTA" in respuesta_texto.upper()
               or "OBSERVADOR" in respuesta_texto.upper()
           ):
-            # Intentar extraer datos básicos para el repositorio
             guardar_en_db(
                 estudiante="Estudiante Registrado",
                 documento="N/A",
