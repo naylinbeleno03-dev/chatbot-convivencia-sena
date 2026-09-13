@@ -518,7 +518,7 @@ with st.sidebar:
     st.session_state.messages = []
     st.rerun()
     
-with tab_chat:
+    with tab_chat:
     SYSTEM_PROMPT = f"""
     Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
     Estás orientando a un usuario con el perfil de: {user_role}.
