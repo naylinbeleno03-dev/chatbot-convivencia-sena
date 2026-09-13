@@ -594,7 +594,7 @@ with tab_chat:
 
       with st.spinner("Procesando información institucional..."):
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT, temperature=0.2
@@ -657,7 +657,7 @@ with tab_repositorio:
     )
   with col_f2:
     filtro_b = st.text_input(
-        "Buscar por Estudiante, Documento o Docente:", ""
+        "Buscar por Nombre del Estudiante, o Número de Identificación:", ""
     )
 
   registros = consultar_registros_db(
