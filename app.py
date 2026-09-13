@@ -102,12 +102,8 @@ init_db()
 # ENLACES NORMATIVOS
 # ==============================================================================
 URL_CONSTITUCION_POLITICA = ("https://www.registraduria.gov.co/IMG/pdf/constitucio-politica-colombia-1991.pdf")
-URL_LEY_115 = (
-    "https://www.mineducacion.gov.co/1621/articles-85906_archivo_pdf.pdf"
-)
-URL_LEY_1098 = (
-    "https://www.icbf.gov.co/sites/default/files/codigoinfancialey1098.pdf"
-)
+URL_LEY_115 = ("https://www.mineducacion.gov.co/1621/articles-85906_archivo_pdf.pdf")
+URL_LEY_1098 = ("https://www.icbf.gov.co/sites/default/files/codigoinfancialey1098.pdf")
 URL_LEY_1620 = ("https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=52287")
 URL_DECRETO_1965 = ("https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=54537")
 URL_MANUAL_CONVIVENCIA = ("https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing")
@@ -115,8 +111,8 @@ URL_MANUAL_CONVIVENCIA = ("https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6G
 # Configuración inicial de la página
 st.set_page_config(
     page_title=(
-        "Sistema Integral de Convivencia Escolar - Institución Educativa"
-        " Técnica Sagrado Corazón"
+        "Sistema Integral de Convivencia Escolar"
+        "Institución Educativa Técnica Sagrado Corazón"
     ),
     layout="centered",
 )
