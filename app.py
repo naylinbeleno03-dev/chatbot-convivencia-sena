@@ -514,43 +514,10 @@ with st.sidebar:
     st.markdown("2. El sistema categorizará el hecho y el protocolo.")
     st.markdown("3. Se generará la plantilla oficial descargable en Word.")
 
-# 1. El bloque de estilos CSS (va dentro de tu st.markdown con <style>)
-st.markdown(
-    """
-    <style>
-    /* Estilos del botón en la barra lateral para que quede alineado a la izquierda */
-    section[data-testid="stSidebar"] .stButton>button {
-        background-color: #FFFFFF !important;
-        color: #1F2937 !important;
-        border: 1px solid #FFFFFF !important;
-        border-radius: 6px !important;
-        font-weight: 600 !important;
-        width: auto !important;        /* Evita que ocupe todo el ancho */
-        display: block !important;
-        margin-left: 0 !important;     /* Lo alinea a la izquierda */
-        margin-right: auto !important;
-    }
-    
-    /* Fuerza a que el texto del botón se vea oscuro y no en blanco */
-    section[data-testid="stSidebar"] .stButton>button p,
-    section[data-testid="stSidebar"] .stButton>button span {
-        color: #1F2937 !important;
-    }
-
-    section[data-testid="stSidebar"] .stButton>button:hover {
-        background-color: #E2E8F0 !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# 2. El botón en tu barra lateral
 if st.button("Reiniciar consulta de chat"):
-  st.session_state.messages = []
-  st.rerun()
-
+    st.session_state.messages = []
+    st.rerun()
+    
 with tab_chat:
     SYSTEM_PROMPT = f"""
     Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
