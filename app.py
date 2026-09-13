@@ -456,7 +456,7 @@ with st.sidebar:
 
 # Pestañas principales de navegación
 tab_chat, tab_repositorio = st.tabs(
-    ["💬 Asistente y Generador de Casos", "📚 Repositorio y Biblioteca Digital"]
+    ["Asistente y Generador de Casos", "Repositorio y Biblioteca Digital"]
 )
 
 with tab_chat:
@@ -650,7 +650,7 @@ with tab_chat:
         st.error(f"Error de comunicación con el servicio: {e}")
 
 with tab_repositorio:
-  st.subheader("📚 Repositorio y Biblioteca de Convivencia Escolar")
+  st.subheader("Repositorio y Biblioteca de Convivencia Escolar")
   st.markdown(
       "Consulte los registros y actas archivados en el sistema institucional."
   )
