@@ -530,17 +530,17 @@ Bloque final de firmas para el documento digital (ÚNICO LUGAR CON SUBRAYADOS):
   Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
 
 
-  ____________________________________
+  "____________________________________"
   Firma del Estudiante
   Documento de Identidad N.° [Documento suministrado]
 
 
-  ____________________________________
+  "____________________________________"
   Firma del Acudiente / Representante Legal
   Documento de Identidad N.° ____________________
 
 
-  ____________________________________
+  "____________________________________"
   Firma del Docente Reportante / Coordinación
 """
 
