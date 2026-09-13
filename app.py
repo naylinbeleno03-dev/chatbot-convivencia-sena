@@ -529,18 +529,21 @@ Bloque final de firmas para el documento digital (ÚNICO LUGAR CON SUBRAYADOS):
   Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
 
 
-  ____________________________________
-  Firma del Estudiante
-  Documento de Identidad N.° [Documento suministrado]
+
+&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+Firma del Estudiante
+Documento de Identidad N.° [Documento suministrado]
 
 
-  ____________________________________
-  Firma del Acudiente / Representante Legal
-  Documento de Identidad N.° ____________________
+
+&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+Firma del Acudiente / Representante Legal
+Documento de Identidad N.° &#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
 
 
-  ____________________________________
-  Firma del Docente Reportante / Coordinación
+
+&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+Firma del Docente Reportante / Coordinación
 """
 
 WELCOME_MESSAGE = f"""
