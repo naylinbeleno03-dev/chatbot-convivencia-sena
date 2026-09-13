@@ -189,7 +189,6 @@ def generar_documento_word(texto_contenido):
         p_head.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         p_head.paragraph_format.space_after = Pt(0)
 
-        # Búsqueda y adjunto del escudo/logo institucional en el Word
         posibles_nombres_imagen = [
             "escudo.png",
             "escudo.jpg",
@@ -337,18 +336,7 @@ with st.sidebar:
 
     st.markdown("---")
     if st.button("Reiniciar consulta"):
-        st.session_state.messages = [
-            {
-                "role": "assistant",
-                "content": f"""
-Saludos. Bienvenido(a) al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón.
-
-Sesión iniciada como: **{user_role}**.
-
-Por favor, seleccione una de las situaciones predeterminadas o escriba los detalles en la casilla inferior.
-""",
-            }
-        ]
+        st.session_state.messages = []
         st.rerun()
 
 # Prompt de sistema institucional
@@ -381,6 +369,7 @@ Sesión iniciada como: **{user_role}**.
 Por favor, seleccione una de las situaciones predeterminadas o escriba los detalles en la casilla inferior.
 """
 
+# Inicialización del historial de chat
 if "messages" not in st.session_state or len(st.session_state.messages) == 0:
     st.session_state.messages = [
         {"role": "assistant", "content": WELCOME_MESSAGE}
