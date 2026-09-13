@@ -241,7 +241,7 @@ def limpiar_texto_para_word(texto: str) -> str:
     if not texto:
         return ""
     # Eliminar líneas divisorias (---, ***)
-    texto = re.sub(r"^[-\*_]{3,}\s*$", "", texto, flags=re.MULTILINE)
+    texto = re.sub(r"^[-*]{3,}\s*$", "", texto, flags=re.MULTILINE)
     # Eliminar viñetas de markdown al inicio de línea
     texto = re.sub(r"^\s*[-\*]\s+", "", texto, flags=re.MULTILINE)
     # Eliminar guiones dobles
