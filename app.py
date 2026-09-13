@@ -72,7 +72,22 @@ def guardar_en_db(
     pass
 
 
-def consultar_registros_db(filtro_grado="", filtro_busqueda=""):
+def consultar_anios_db():
+  try:
+    conn = sqlite3.connect("convivencia_intesac.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT DISTINCT SUBSTR(fecha_creacion, 1, 4) FROM"
+        " registros_convivencia"
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return [r[0] for r in rows if r[0]]
+  except Exception:
+    return ["2026"]
+
+
+def consultar_registros_db(filtro_grado="", filtro_busqueda="", filtro_anio=""):
   conn = sqlite3.connect("convivencia_intesac.db")
   cursor = conn.cursor()
   query = "SELECT fecha_creacion, estudiante, documento, grado, asignatura, docente, tipo_falta, contenido_completo FROM registros_convivencia WHERE 1=1"
@@ -81,6 +96,10 @@ def consultar_registros_db(filtro_grado="", filtro_busqueda=""):
   if filtro_grado and filtro_grado != "Todos":
     query += " AND grado = ?"
     params.append(filtro_grado)
+
+  if filtro_anio and filtro_anio != "Todos":
+    query += " AND SUBSTR(fecha_creacion, 1, 4) = ?"
+    params.append(filtro_anio)
 
   if filtro_busqueda:
     query += (
@@ -372,7 +391,12 @@ def generar_documento_word(texto_contenido):
       run = p.add_run(linea_limpia.replace("**", ""))
       run.font.size = Pt(10)
       run.font.name = "Arial"
-      run.font.bold = "FIRMA" in linea.upper() or "ESTUDIANTE" in linea.upper() or "ACUDIENTE" in linea.upper() or "DOCENTE" in linea.upper()
+      run.font.bold = (
+          "FIRMA" in linea.upper()
+          or "ESTUDIANTE" in linea.upper()
+          or "ACUDIENTE" in linea.upper()
+          or "DOCENTE" in linea.upper()
+      )
       run.font.color.rgb = RGBColor(31, 41, 55)
       if "________________" in linea:
         p.paragraph_format.space_before = Pt(36)
@@ -482,18 +506,18 @@ with tab_chat:
     3. Procedimiento institucional.
     4. Garantías y Debido Proceso (Art. 29).
     5. Modelo de Documento Digital Sugerido (Iniciando con "ACTA DE COMPROMISO DEL ESTUDIANTE" o "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA ESCOLAR"). 
-       El bloque final de firmas debe ser limpio y estructurado exactamente así:
+        El bloque final de firmas debe ser limpio y estructurado exactamente así:
 
-       Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
-
-
-       ________________________________________          ________________________________________
-       Firma del Estudiante                              Firma del Acudiente / Representante Legal
-       Documento N.° [Documento suministrado]            Documento N.° ____________________
+        Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
 
 
-       ________________________________________
-       Firma del Docente Reportante / Coordinación
+        ________________________________________          ________________________________________
+        Firma del Estudiante                              Firma del Acudiente / Representante Legal
+        Documento N.° [Documento suministrado]              Documento N.° ____________________
+
+
+        ________________________________________
+        Firma del Docente Reportante / Coordinación
     """
 
   WELCOME_MESSAGE = f"""
@@ -511,18 +535,17 @@ with tab_chat:
   for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
       st.markdown(msg["content"])
-      # Condición estricta: Mostrar el botón de descarga ÚNICAMENTE en el mensaje final que contiene la asesoría completa y la plantilla (5 PUNTOS o ACTA/OBSERVADOR)
       if msg["role"] == "assistant" and idx > 0:
         texto_msg = msg["content"].upper()
         if "5." in texto_msg or "ACTA" in texto_msg or "OBSERVADOR" in texto_msg:
-          content_hash = hashlib.md5(msg["content"].encode("utf-8"))[
-              :8
-          ]
+          content_hash = hashlib.md5(
+              msg["content"].encode("utf-8")
+          ).hexdigest()[:8]
           if HAS_DOCX:
             docx_bytes = generar_documento_word(msg["content"])
             st.download_button(
                 label=(
-                    "📄 Descargar Documento Oficial en Microsoft Word (.docx)"
+                    "Descargar Documento Oficial en Microsoft Word (.docx)"
                 ),
                 data=docx_bytes,
                 file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.docx",
@@ -533,7 +556,7 @@ with tab_chat:
             )
           else:
             st.download_button(
-                label="📄 Guardar texto (.txt)",
+                label="Guardar texto (.txt)",
                 data=msg["content"],
                 file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
                 mime="text/plain",
@@ -598,7 +621,9 @@ with tab_chat:
             " de la institución."
         )
 
-  user_input = st.chat_input("Escriba aquí los hechos de la situación a evaluar...")
+  user_input = st.chat_input(
+      "Escriba aquí los hechos de la situación a evaluar..."
+  )
   prompt = selected_option or user_input
 
   if prompt:
@@ -654,7 +679,7 @@ with tab_chat:
       error_msg = str(e)
       if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
         st.warning(
-            "⚠️ El servicio ha alcanzado el límite de consultas por minuto."
+            "El servicio ha alcanzado el límite de consultas por minuto."
             " Espere unos segundos e intente de nuevo."
         )
       else:
@@ -663,30 +688,30 @@ with tab_chat:
 with tab_repositorio:
   st.subheader("Repositorio y Biblioteca de Convivencia Escolar")
   st.markdown(
-      "Consulte los registros y actas archivados en el sistema institucional."
+      "Consulte el archivo histórico de actas y registros institucionales"
+      " organizados por **Año**, **Grado** y términos de búsqueda."
   )
 
-  col_f1, col_f2 = st.columns(2)
+  anios_disponibles = consultar_anios_db()
+  if not anios_disponibles:
+    anios_disponibles = ["2026"]
+  lista_anios_select = ["Todos"] + sorted(
+      list(set(anios_disponibles)), reverse=True
+  )
+
+  col_f1, col_f2, col_f3 = st.columns(3)
   with col_f1:
+    filtro_a = st.selectbox("Filtrar por Año:", lista_anios_select)
+  with col_f2:
     filtro_g = st.selectbox(
         "Filtrar por Grado:",
-        [
-            "Todos",
-            "6°",
-            "7°",
-            "8°",
-            "9°",
-            "10°",
-            "11°",
-        ],
+        ["Todos", "6°", "7°", "8°", "9°", "10°", "11°"],
     )
-  with col_f2:
-    filtro_b = st.text_input(
-        "Buscar por Nombre del Estudiante o Número de Identificación:", ""
-    )
+  with col_f3:
+    filtro_b = st.text_input("Buscar (Estudiante / Documento):", "")
 
   registros = consultar_registros_db(
-      filtro_grado=filtro_g, filtro_busqueda=filtro_b
+      filtro_grado=filtro_g, filtro_busqueda=filtro_b, filtro_anio=filtro_a
   )
 
   if registros:
@@ -694,7 +719,7 @@ with tab_repositorio:
     for reg in registros:
       fecha, est, doc, grado, asig, docen, tipo, contenido = reg
       with st.expander(
-          f"📁 {est} (Grado: {grado}) — Fecha: {fecha} [Tipo: {tipo}]"
+          f" {est} (Grado: {grado}) — Fecha: {fecha} [Tipo: {tipo}]"
       ):
         st.markdown(f"**Documento:** {doc}")
         st.markdown(f"**Asignatura:** {asig} | **Docente:** {docen}")
@@ -703,7 +728,7 @@ with tab_repositorio:
         if HAS_DOCX:
           docx_bytes = generar_documento_word(contenido)
           st.download_button(
-              label="📥 Descargar Acta en Word",
+              label="Descargar Acta en Word",
               data=docx_bytes,
               file_name=f"Acta_{est.replace(' ', '_')}.docx",
               mime=(
@@ -713,6 +738,6 @@ with tab_repositorio:
           )
   else:
     st.warning(
-        "No hay registros guardados en la base de datos o no coinciden con los"
-        " filtros de búsqueda."
+        "No hay registros guardados en la base de datos para los filtros de"
+        " año, grado o búsqueda seleccionados."
     )
