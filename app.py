@@ -526,15 +526,16 @@ with st.sidebar:
     st.markdown("2. El sistema categorizará el hecho y el protocolo.")
     st.markdown("3. Se generará la plantilla oficial descargable en Word.")
 
-        if st.button("Reiniciar consulta de chat"):
-    st.session_state.messages = []
-    st.rerun()
-    
-    with tab_chat:
+    if st.button("Reiniciar consulta de chat"):
+        st.session_state.messages = []
+        st.rerun()
+
+with tab_asistente:
     SYSTEM_PROMPT = f"""
     Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
     Estás orientando a un usuario con el perfil de: {user_role}.
     Tu propósito es asesorar formal y pedagógicamente ante situaciones disciplinarias, asegurando el cumplimiento estricto de la Constitución Política (Art. 29), Ley 115, Ley 1098, Ley 1620, Decreto 1965 y el Manual de Convivencia.
+    ...
 
     REGLAS DE CONOCIMIENTO Y LENGUAJE:
     - Tú conoces a fondo el Manual de Convivencia institucional. NUNCA utilices expresiones condicionales, dudosas o evasivas como "si aplica", "si el Manual contempla", "dependiendo de lo que diga el manual". Afirma de forma directa, certera y categórica las normas, protocolos y medidas disciplinarias establecidas.
