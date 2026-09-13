@@ -1,3 +1,4 @@
+import hashlib
 import io
 import os
 import re
@@ -101,18 +102,22 @@ init_db()
 # ==============================================================================
 # ENLACES NORMATIVOS
 # ==============================================================================
-URL_CONSTITUCION_POLITICA = ("https://www.registraduria.gov.co/IMG/pdf/constitucio-politica-colombia-1991.pdf")
-URL_LEY_115 = ("https://www.mineducacion.gov.co/1621/articles-85906_archivo_pdf.pdf")
-URL_LEY_1098 = ("https://www.icbf.gov.co/sites/default/files/codigoinfancialey1098.pdf")
-URL_LEY_1620 = ("https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=52287")
-URL_DECRETO_1965 = ("https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=54537")
-URL_MANUAL_CONVIVENCIA = ("https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing")
+URL_CONSTITUCION_POLITICA = "https://www.registraduria.gov.co/IMG/pdf/constitucio-politica-colombia-1991.pdf"
+URL_LEY_115 = (
+    "https://www.mineducacion.gov.co/1621/articles-85906_archivo_pdf.pdf"
+)
+URL_LEY_1098 = (
+    "https://www.icbf.gov.co/sites/default/files/codigoinfancialey1098.pdf"
+)
+URL_LEY_1620 = "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=52287"
+URL_DECRETO_1965 = "https://www.funcionpublica.gov.co/eva/gestornormativo/norma_pdf.php?i=54537"
+URL_MANUAL_CONVIVENCIA = "https://drive.google.com/file/d/10WqGY5EvXzCMPROBZB6Ga6J4zjrEzmOG/view?usp=sharing"
 
 # Configuración inicial de la página
 st.set_page_config(
     page_title=(
         "Sistema Integral de Convivencia Escolar"
-        "Institución Educativa Técnica Sagrado Corazón"
+        " Institución Educativa Técnica Sagrado Corazón"
     ),
     layout="centered",
 )
@@ -483,6 +488,9 @@ with tab_chat:
     with st.chat_message(msg["role"]):
       st.markdown(msg["content"])
       if msg["role"] == "assistant" and idx > 0:
+        content_hash = hashlib.md5(msg["content"].encode("utf-8")).hexdigest()[
+            :8
+        ]
         if HAS_DOCX:
           docx_bytes = generar_documento_word(msg["content"])
           st.download_button(
@@ -494,7 +502,7 @@ with tab_chat:
               mime=(
                   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               ),
-              key=f"dl_word_{idx}",
+              key=f"dl_word_{idx}_{content_hash}",
           )
         else:
           st.download_button(
@@ -502,7 +510,7 @@ with tab_chat:
               data=msg["content"],
               file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
               mime="text/plain",
-              key=f"dl_txt_{idx}",
+              key=f"dl_txt_{idx}_{content_hash}",
           )
 
   # Botones rápidos
@@ -586,7 +594,7 @@ with tab_chat:
 
       with st.spinner("Procesando información institucional..."):
         response = client.models.generate_content(
-            model="gemini-3.6-flash",
+            model="gemini-2.5-flash",
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT, temperature=0.2
@@ -600,7 +608,10 @@ with tab_chat:
           )
 
           # Si la respuesta ya incluye el documento completo (tiene 5 puntos o acta), lo guardamos automáticamente en la BD
-          if "ACTA" in respuesta_texto.upper() or "OBSERVADOR" in respuesta_texto.upper():
+          if (
+              "ACTA" in respuesta_texto.upper()
+              or "OBSERVADOR" in respuesta_texto.upper()
+          ):
             # Intentar extraer datos básicos para el repositorio
             guardar_en_db(
                 estudiante="Estudiante Registrado",
