@@ -145,20 +145,21 @@ def extraer_solo_documento(texto_contenido: str) -> str:
         return ""
 
     patrones = [
-        r"(ACTA DE COMPROMISO.*)",
-        r"(MODELO DE CARTA.*)",
-        r"(MODELO DE REGISTRO.*)",
-        r"(REGISTRO EN EL OBSERVADOR.*)",
-        r"(CARTA DE DESCARGOS.*)",
-        r"(CITACIÓN A ACUDIENTE.*)",
-        r"(5\.\s*MODELO.*)",
-        r"(5\.\s*DOCUMENTO.*)",
-        r"(5\.\s*ACTA.*)",
-        r"(5\.\s*REGISTRO.*)",
+        r"(ACTA DE COMPROMISO[\s\S]*)",
+        r"(MODELO DE CARTA[\s\S]*)",
+        r"(MODELO DE REGISTRO[\s\S]*)",
+        r"(REGISTRO EN EL OBSERVADOR[\s\S]*)",
+        r"(CARTA DE DESCARGOS[\s\S]*)",
+        r"(CITACIÓN A ACUDIENTE[\s\S]*)",
+        r"(FORMATO DE.*)",
+        r"(PLANTILLA.*)",
+        r"(5\.\s*MODELO[\s\S]*)",
+        r"(5\.\s*DOCUMENTO[\s\S]*)",
+        r"(5\.\s*ACTA[\s\S]*)",
     ]
 
     for patron in patrones:
-        match = re.search(patron, texto_contenido, re.IGNORECASE | re.DOTALL)
+        match = re.search(patron, texto_contenido, re.IGNORECASE)
         if match:
             texto_extraido = match.group(1)
             lineas = texto_extraido.split("\n")
@@ -187,6 +188,29 @@ def generar_documento_word(texto_contenido):
         p_head = header.paragraphs[0]
         p_head.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         p_head.paragraph_format.space_after = Pt(0)
+
+        # Búsqueda y adjunto del escudo/logo institucional en el Word
+        posibles_nombres_imagen = [
+            "escudo.png",
+            "escudo.jpg",
+            "escudo_intesac.png",
+            "escudo_intesac.jpg",
+            "logo.png",
+            "logo.jpg",
+        ]
+        imagen_encontrada = None
+        for nombre in posibles_nombres_imagen:
+            if os.path.exists(nombre):
+                imagen_encontrada = nombre
+                break
+
+        if imagen_encontrada:
+            try:
+                r_img = p_head.add_run()
+                r_img.add_picture(imagen_encontrada, width=Inches(0.55))
+                p_head.add_run("\n")
+            except Exception:
+                pass
 
         r_head = p_head.add_run(
             "INSTITUCIÓN EDUCATIVA TÉCNICA SAGRADO CORAZÓN\nSistema Digital de"
@@ -284,14 +308,6 @@ with st.sidebar:
         ["Estudiante", "Acudiente / Padre de Familia", "Docente / Directivo"],
     )
 
-    # **Sección de Años Escolares para el Repositorio Digital**
-    st.markdown("---")
-    anio_escolar = st.selectbox(
-        "Año Escolar del Repositorio:",
-        [2026, 2025, 2024, 2023],
-        index=0,
-    )
-
     st.markdown("---")
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
@@ -321,13 +337,23 @@ with st.sidebar:
 
     st.markdown("---")
     if st.button("Reiniciar consulta"):
-        st.session_state.messages = []
+        st.session_state.messages = [
+            {
+                "role": "assistant",
+                "content": f"""
+Saludos. Bienvenido(a) al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón.
+
+Sesión iniciada como: **{user_role}**.
+
+Por favor, seleccione una de las situaciones predeterminadas o escriba los detalles en la casilla inferior.
+""",
+            }
+        ]
         st.rerun()
 
 # Prompt de sistema institucional
 SYSTEM_PROMPT = f"""
 Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
-Año escolar activo en el repositorio: {anio_escolar}.
 Estás orientando a un usuario con el perfil de: {user_role}.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de la Institución Educativa Técnica Sagrado Corazón.
@@ -343,14 +369,14 @@ Para poder generar el reporte y el documento digital oficial completo, se requie
 7. Fecha exacta de los hechos
 
 - SI FALTA UNO O MÁS DE LOS 7 DATOS MENCIONADOS: NO generes aún los 5 puntos de la asesoría ni la plantilla del documento. Pídeselos amablemente al usuario.
-- SI YA TIENES LOS 7 DATOS COMPLETOS: Procede inmediatamente a generar la asesoría completa en 5 puntos e incluye al final la línea de metadatos con el año {anio_escolar}:
-[REGISTRO_DB | Año: {anio_escolar} | Nombre: ... | Documento: ... | Grado: ... | Asignatura: ... | Docente: ... | Horario: ... | Fecha: ... | TipoFalta: ...]
+- SI YA TIENES LOS 7 DATOS COMPLETOS: Procede inmediatamente a generar la asesoría completa en 5 puntos e incluye al final la línea de metadatos:
+[REGISTRO_DB | Nombre: ... | Documento: ... | Grado: ... | Asignatura: ... | Docente: ... | Horario: ... | Fecha: ... | TipoFalta: ...]
 """
 
 WELCOME_MESSAGE = f"""
 Saludos. Bienvenido(a) al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón.
 
-Sesión iniciada como: **{user_role}** | **Año Repositorio: {anio_escolar}**.
+Sesión iniciada como: **{user_role}**.
 
 Por favor, seleccione una de las situaciones predeterminadas o escriba los detalles en la casilla inferior.
 """
@@ -373,7 +399,7 @@ for idx, msg in enumerate(st.session_state.messages):
                     ),
                     data=docx_bytes,
                     file_name=(
-                        f"Documento_Convivencia_SagradoCorazon_{anio_escolar}_{idx}.docx"
+                        f"Documento_Convivencia_SagradoCorazon_{idx}.docx"
                     ),
                     mime=(
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -432,7 +458,7 @@ if prompt:
 
         with st.spinner("Procesando información institucional..."):
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-3.6-flash",
                 contents=contents,
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_PROMPT, temperature=0.2
