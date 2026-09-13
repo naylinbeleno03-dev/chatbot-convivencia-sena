@@ -493,16 +493,17 @@ Para poder generar el reporte y el documento digital oficial completo, se requie
 1. Nombre completo del estudiante
 2. Número de documento de identidad del estudiante
 3. Grado y curso del estudiante
-4. Asignatura / Clase en la que ocurrió el incidente(o si fue en la entrada a clases, recreo o salida)
+4. Asignatura / Clase en la que ocurrió el incidente (o si fue en la entrada a clases, recreo o salida)
 5. Nombre completo del docente a cargo / reportante
 6. Horario o Rango de horas en que sucedió
 7. Fecha exacta de los hechos
 
 EVALUACIÓN DEL HISTORIAL EN CADA TURNO:
 - Antes de responder, analiza detalladamente TODO el historial de la conversación.
-- SI FALTA UNO O MÁS DE LOS 7 DATOS MENCIONADOS: NO generes aún los 5 puntos de la asesoría ni la plantilla del documento. En su lugar, responde de forma amable, clara y formal indicando exactamente cuáles datos faltan y pidiéndoselos al usuario.
-- SI EL USUARIO NO RESPONDE O DEJA CAMPOS INCOMPLETOS EN SU SIGUIENTE MENSAJE: Vuelve a preguntarle insistente pero respetuosamente por los datos faltantes. NO avances hasta tener los 7 datos completos.
-- SI YA TIENES LOS 7 DATOS COMPLETOS EN EL HISTORIAL: Procede inmediatamente a generar la asesoría completa en 5 puntos.
+- SI FALTA AL MENOS UNO DE LOS 7 DATOS MENCIONADOS: ESTÁ ESTRICTAMENTE PROHIBIDO generar los 5 puntos de la asesoría, el acta, plantilla o documento formal. Limítate únicamente a saludar, orientar brevemente y pedir de forma amable y explícita los datos que todavía hacen falta en el historial.
+- SI EL USUARIO NO RESPONDE O DEJA CAMPOS INCOMPLETOS EN SU SIGUIENTE MENSAJE: Vuelve a preguntarle insistente pero respetuosamente por los datos faltantes. NO avances ni generes documentos hasta tener los 7 datos completos.
+- SOLO CUANDO TENGAS LOS 7 DATOS COMPLETOS EN EL HISTORIAL: Procede inmediatamente a generar la asesoría completa estructurada en 5 puntos, incluyendo el modelo de documento digital con las líneas de firma (usando &#95;) y añade al final la línea de metadatos:
+[REGISTRO_DB | Nombre: ... | Documento: ... | Grado: ... | Asignatura: ... | Docente: ... | Horario: ... | Fecha: ... | TipoFalta: ...]
 
 Instrucciones de formato para el documento digital (Una vez recolectados todos los datos):
 - Este sistema es 100% digital para el archivo y repositorio institucional por año escolar. Queda ESTRICTAMENTE PROHIBIDO mencionar que el documento debe ser impreso, firmado en papel o presentado en físico.
@@ -564,8 +565,8 @@ for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-        # Generación del botón de descarga directa en Word para los mensajes del asistente
-        if msg["role"] == "assistant" and idx > 0:
+        # Generación del botón de descarga directa en Word para los mensajes del asistente (Solo si ya contiene la estructura completa del documento)
+        if msg["role"] == "assistant" and idx > 0 and "ACTA DE COMPROMISO" in msg["content"] or "REGISTRO EN EL OBSERVADOR" in msg["content"]:
             if HAS_DOCX:
                 docx_bytes = generar_documento_word(msg["content"])
                 st.download_button(
