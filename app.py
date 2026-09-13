@@ -514,7 +514,7 @@ with st.sidebar:
     st.markdown("2. El sistema categorizará el hecho y el protocolo.")
     st.markdown("3. Se generará la plantilla oficial descargable en Word.")
 
-          if st.button("Reiniciar consulta de chat"):
+        if st.button("Reiniciar consulta de chat"):
     st.session_state.messages = []
     st.rerun()
     
