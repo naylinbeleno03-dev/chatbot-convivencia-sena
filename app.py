@@ -122,7 +122,7 @@ st.set_page_config(
     layout="centered",
 )
 
-# Estilos CSS personalizados
+# Estilos CSS personalizados (Corregido el color de texto en botones del sidebar)
 st.markdown(
     """
     <style>
@@ -187,6 +187,20 @@ st.markdown(
         border-radius: 6px !important;
         font-weight: 600 !important;
         width: 100%;
+    }
+    /* CORRECCIÓN: Forzar color oscuro en todos los elementos internos del botón del sidebar */
+    section[data-testid="stSidebar"] .stButton>button *,
+    section[data-testid="stSidebar"] .stButton>button p,
+    section[data-testid="stSidebar"] .stButton>button span {
+        color: #1F2937 !important;
+    }
+    section[data-testid="stSidebar"] .stButton>button:hover {
+        background-color: #E2E8F0 !important;
+    }
+    section[data-testid="stSidebar"] .stButton>button:hover *,
+    section[data-testid="stSidebar"] .stButton>button:hover p,
+    section[data-testid="stSidebar"] .stButton>button:hover span {
+        color: #0F172A !important;
     }
     .stMainBlockContainer div.stButton > button {
         background-color: #FFFFFF !important;
