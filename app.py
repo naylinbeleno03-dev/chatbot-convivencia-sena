@@ -435,8 +435,6 @@ user_role = st.selectbox(
     ["Estudiante", "Acudiente / Padre de Familia", "Docente / Directivo"],
 )
 
-st.markdown("---")
-
         st.sidebar.markdown("---")
         st.sidebar.markdown("### Biblioteca Virtual")
         st.sidebar.markdown(
