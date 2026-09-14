@@ -423,7 +423,7 @@ def generar_documento_word(texto_contenido):
 
 
 # Barra lateral izquierda
-with st.sidebar:
+    with st.sidebar:
     st.header("Configuración del Sistema")
 
     if not api_key:
