@@ -515,7 +515,6 @@ Reglas estrictas de formato para el documento digital:
 - No incluyas meta-etiquetas ni subtítulos innecesarios dentro del cuerpo del documento.
 - Los compromisos o acuerdos deben representarse estrictamente como una lista numerada secuencial (1., 2., 3.).
 - Mantén un tono formal, institucional y cercano.
-"""
 
 Estructura de la respuesta cuando los datos están completos (5 PUNTOS):
 1. Resumen de la situación: Síntesis objetiva integrando los datos recolectados.
