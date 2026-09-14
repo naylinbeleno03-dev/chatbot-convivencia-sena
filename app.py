@@ -531,20 +531,19 @@ Estructura de la respuesta cuando los datos están completos (5 PUNTOS):
 
 Bloque final de firmas para el documento digital (ÚNICO LUGAR CON SUBRAYADOS):
   Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
+  
+&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+Firma del Estudiante
+Documento de Identidad N.° [Documento suministrado]
 
 
-  ____________________________________
-  Firma del Estudiante
-  Documento de Identidad N.° [Documento suministrado]
+&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+Firma del Acudiente / Representante Legal
+Documento de Identidad N.° &#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
 
 
-  ____________________________________
-  Firma del Acudiente / Representante Legal
-  Documento de Identidad N.° ____________________
-
-
-  ____________________________________
-  Firma del Docente Reportante / Coordinación
+&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+Firma del Docente Reportante / Coordinación
 """
 
 WELCOME_MESSAGE = f"""
