@@ -41,20 +41,17 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* 1. Fondo principal en Gris Clarito */
     .stApp {
         background-color: #F3F4F6;
         color: #1F2937;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* 2. Barra lateral en Gris un poco más oscuro */
     section[data-testid="stSidebar"] {
         background-color: #475569;
         border-right: 1px solid #334155;
     }
 
-    /* Textos de la barra lateral en blanco */
     section[data-testid="stSidebar"] h1, 
     section[data-testid="stSidebar"] h2, 
     section[data-testid="stSidebar"] h3,
@@ -65,7 +62,6 @@ st.markdown(
         color: #FFFFFF !important;
     }
 
-    /* Visibilidad del desplegable (st.expander) en la barra lateral */
     section[data-testid="stSidebar"] details {
         background-color: #334155 !important;
         border: 1px solid #64748B !important;
@@ -88,14 +84,12 @@ st.markdown(
         color: #FFFFFF !important;
     }
 
-    /* Resaltado para los enlaces normativos */
     section[data-testid="stSidebar"] details a {
         color: #FDE047 !important;
         text-decoration: underline !important;
         font-weight: 600 !important;
     }
 
-    /* 3. Encabezado superior */
     .header-box {
         background-color: #0F172A;
         padding: 22px;
@@ -119,7 +113,6 @@ st.markdown(
         font-size: 0.95rem !important;
     }
 
-    /* Botón de reiniciar consulta en el menú lateral */
     section[data-testid="stSidebar"] .stButton>button,
     section[data-testid="stSidebar"] .stButton>button p,
     section[data-testid="stSidebar"] .stButton>button div,
@@ -142,7 +135,6 @@ st.markdown(
         border-color: #000000 !important;
     }
 
-    /* Botones de opciones predeterminadas en el panel principal */
     .stMainBlockContainer div.stButton > button {
         background-color: #FFFFFF !important;
         color: #0F172A !important;
@@ -160,7 +152,6 @@ st.markdown(
         border-color: #0F172A !important;
     }
 
-    /* Campo de clave API */
     .stTextInput>div>div>input {
         background-color: #FFFFFF !important;
         color: #000000 !important;
@@ -168,7 +159,6 @@ st.markdown(
         border-radius: 6px !important;
     }
 
-    /* Tarjetas de mensajes en el chat */
     [data-testid="stChatMessage"] {
         background-color: #FFFFFF !important;
         border: 1px solid #E5E7EB !important;
@@ -187,7 +177,6 @@ st.markdown(
         line-height: 1.6;
     }
 
-    /* Campo de entrada de hechos */
     [data-testid="stChatInput"] {
         background-color: #FFFFFF !important;
         border: 2px solid #475569 !important;
@@ -200,7 +189,6 @@ st.markdown(
         background-color: #FFFFFF !important;
     }
 
-    /* Botón de Enviar */
     [data-testid="stChatInput"] button {
         background-color: #000000 !important;
         border-color: #000000 !important;
@@ -237,15 +225,11 @@ api_key = st.secrets.get("GEMINI_API_KEY", "")
 
 
 def limpiar_texto_para_word(texto: str) -> str:
-    """Limpia guiones, viñetas de markdown y líneas divisorias."""
+    """Limpia viñetas de markdown manteniendo intactos los guiones bajos y espacios."""
     if not texto:
         return ""
-    # Eliminar líneas divisorias (---, ***)
-    texto = re.sub(r"^[-*]{3,}\s*$", "", texto, flags=re.MULTILINE)
     # Eliminar viñetas de markdown al inicio de línea
-    texto = re.sub(r"^\s*[-\*]\s+", "", texto, flags=re.MULTILINE)
-    # Eliminar guiones dobles
-    texto = re.sub(r"-{2,}", "", texto)
+    texto = re.sub(r"^\s*[\*\-]\s+", "", texto, flags=re.MULTILINE)
     return texto.strip()
 
 
@@ -283,21 +267,17 @@ def extraer_solo_documento(texto_contenido: str) -> str:
     return texto_contenido.strip()
 
 
-# Función para generar archivo de Microsoft Word (.docx) formal
 def generar_documento_word(texto_contenido):
     doc = Document()
-
-    # Extraer estrictamente solo la plantilla formal para la biblioteca digital
     texto_documento = extraer_solo_documento(texto_contenido)
 
-    # Configuración de página y secciones
     for section in doc.sections:
         section.top_margin = Inches(0.8)
         section.bottom_margin = Inches(0.8)
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-        # 1. ENCABEZADO INSTITUCIONAL (Esquina superior derecha, discreto)
+        # Encabezado
         header = section.header
         p_head = header.paragraphs[0]
         p_head.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -326,28 +306,26 @@ def generar_documento_word(texto_contenido):
                 pass
 
         r_head = p_head.add_run(
-            "INSTITUCIÓN EDUCATIVA TÉCNICA SAGRADO CORAZÓN\nSistema Digital de"
-            " Seguimiento y Convivencia"
+            "INSTITUCIÓN EDUCATIVA TÉCNICA SAGRADO CORAZÓN\nSistema Digital de Seguimiento y Convivencia"
         )
         r_head.font.size = Pt(8)
         r_head.font.name = "Arial"
         r_head.font.bold = True
         r_head.font.color.rgb = RGBColor(100, 116, 139)
 
-        # 2. PIE DE PÁGINA
+        # Pie de página
         footer = section.footer
         p_foot = footer.paragraphs[0]
         p_foot.alignment = WD_ALIGN_PARAGRAPH.CENTER
         r_foot = p_foot.add_run(
-            "Institución Educativa Técnica Sagrado Corazón — Archivo Digital"
-            " de Convivencia Escolar"
+            "Institución Educativa Técnica Sagrado Corazón — Archivo Digital de Convivencia Escolar"
         )
         r_foot.font.size = Pt(8.5)
         r_foot.font.name = "Arial"
         r_foot.font.italic = True
         r_foot.font.color.rgb = RGBColor(100, 116, 139)
 
-    # 3. CUERPO DEL DOCUMENTO
+    # Cuerpo del documento
     lineas = texto_documento.split("\n")
     for linea in lineas:
         linea_limpia = limpiar_texto_para_word(linea)
@@ -358,20 +336,13 @@ def generar_documento_word(texto_contenido):
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
 
-        # Detectar si la línea es el título principal del documento
         if (
             linea.strip().startswith("#")
-            or (
-                linea.strip().startswith("**")
-                and linea.strip().endswith("**")
-            )
-            or "ACTA DE COMPROMISO" in linea.upper()
-            or "MODELO DE CARTA" in linea.upper()
-            or "CARTA DE DESCARGOS" in linea.upper()
-            or "MODELO DE REGISTRO" in linea.upper()
-            or "REGISTRO EN EL OBSERVADOR" in linea.upper()
+            or (linea.strip().startswith("**") and linea.strip().endswith("**"))
+            or "ACTA" in linea.upper()
+            or "REGISTRO" in linea.upper()
+            or "MODELO" in linea.upper()
         ):
-
             texto_titulo = linea_limpia.replace("#", "").replace("**", "")
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run(texto_titulo)
@@ -382,7 +353,6 @@ def generar_documento_word(texto_contenido):
             p.paragraph_format.space_before = Pt(10)
             p.paragraph_format.space_after = Pt(12)
 
-        # Detectar líneas de firma para darles espaciado amplio superior
         elif "________________" in linea or "FIRMA" in linea.upper():
             p.alignment = WD_ALIGN_PARAGRAPH.LEFT
             run = p.add_run(linea_limpia.replace("**", ""))
@@ -390,7 +360,6 @@ def generar_documento_word(texto_contenido):
             run.font.name = "Arial"
             run.font.bold = "FIRMA" in linea.upper()
             run.font.color.rgb = RGBColor(31, 41, 55)
-            # Dar espacio vertical suficiente (36pt) para la firma
             if "________________" in linea:
                 p.paragraph_format.space_before = Pt(36)
                 p.paragraph_format.space_after = Pt(2)
@@ -399,10 +368,7 @@ def generar_documento_word(texto_contenido):
                 p.paragraph_format.space_after = Pt(4)
 
         else:
-            # Alineación justificada para el texto normal
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-
-            # Formato moderado evitando negritas innecesarias
             partes = re.split(r"(\*\*.*?\*\*)", linea_limpia)
             for parte in partes:
                 if parte.startswith("**") and parte.endswith("**"):
@@ -415,7 +381,6 @@ def generar_documento_word(texto_contenido):
                 run.font.name = "Arial"
                 run.font.color.rgb = RGBColor(31, 41, 55)
 
-    # Guardar archivo en memoria y retornar bytes
     buffer = io.BytesIO()
     doc.save(buffer)
     buffer.seek(0)
@@ -429,65 +394,37 @@ with st.sidebar:
     if not api_key:
         api_key = st.text_input("Clave API de Gemini", type="password")
 
-    # Selector de Rol del Usuario
     user_role = st.selectbox(
         "Perfil del Consultante:",
         ["Estudiante", "Acudiente / Padre de Familia", "Docente / Directivo"],
     )
 
     st.markdown("---")
-
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### Biblioteca Virtual")
-    st.sidebar.markdown(
-    "[Abrir Repositorio"
-    " Digital](https://repositorioconvivencia-k3hz5bcgykhxqwn6gn7cjh.streamlit.app/)"
+    st.markdown("### Biblioteca Virtual")
+    st.markdown(
+        "[Abrir Repositorio Digital](https://repositorioconvivencia-k3hz5bcgykhxqwn6gn7cjh.streamlit.app/)"
     )
     
-    # Consulta de Marco Legal e Institucional con ENLACES DIRECTOS
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
-            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art."
-            " 29 (Debido Proceso y Derechos Fundamentales)."
+            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Due Proceso)."
         )
-        st.markdown(
-            f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de"
-            " Educación."
-        )
-        st.markdown(
-            f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Código de la Infancia"
-            " y la Adolescencia."
-        )
-        st.markdown(
-            f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Sistema Nacional de"
-            " Convivencia Escolar."
-        )
-        st.markdown(
-            f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Reglamentación"
-            " de la Ley 1620."
-        )
-        st.markdown(
-            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Manual"
-            " Institucional de Convivencia."
-        )
+        st.markdown(f"* **[Ley 115 de 1994]({URL_LEY_115})**: Educación.")
+        st.markdown(f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Infancia.")
+        st.markdown(f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Convivencia.")
+        st.markdown(f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Decreto.")
+        st.markdown(f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Manual.")
 
     st.markdown("---")
     st.markdown("**Guía de consulta:**")
-    st.markdown("1. Ingrese los detalles de la situación acontecida.")
-    st.markdown(
-        "2. El sistema categorizará el hecho de acuerdo con el marco legal"
-        " colombiano y el Manual de Convivencia."
-    )
-    st.markdown(
-        "3. Se estructurará el procedimiento a seguir y la plantilla"
-        " digital para la biblioteca o repositorio institucional."
-    )
+    st.markdown("1. Ingrese los detalles de la situación.")
+    st.markdown("2. Se categorizará el hecho y se redactará el documento.")
+    st.markdown("3. Descargue el documento oficial en Word.")
 
     if st.button("Reiniciar consulta"):
         st.session_state.messages = []
         st.rerun()
 
-# Prompt de sistema institucional
 SYSTEM_PROMPT = f"""
 Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
 
@@ -495,7 +432,7 @@ Estás orientando a un usuario con el perfil de: {user_role}.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de la Institución Educativa Técnica Sagrado Corazón.
 
-Estructura de respuesta y opciones para el documento digital:
+Estructura de respuesta obligatoria (5 puntos en cada análisis completo):
 1. Resumen de la situación reportada.
 2. Clasificación de la falta (Según el Manual de Convivencia y Ley 1620 de 2013):
    - Situación Tipo I (Leve)
@@ -503,135 +440,62 @@ Estructura de respuesta y opciones para el documento digital:
    - Situación Tipo III (Gravísima)
 3. Procedimiento institucional aplicable.
 4. Garantías y Debido Proceso (Artículo 29 de la Constitución Política).
-5. Generación de Documento Digital:
-   Pregunta al usuario cómo desea proceder para el repositorio institucional:
-   a) **Opción Automática**: Si cuenta con los 7 datos clave (Nombre, Documento, Grado, Asignatura, Docente, Horario, Fecha), el sistema redactará el documento completo integrándolos de forma fluida.
-   b) **Opción Manual (Plantilla en blanco)**: Si prefiere una plantilla genérica, entrega estrictamente la siguiente estructura limpia con líneas de subrayado reales:
-
-   En la Institución Educativa Técnica Sagrado Corazón de Soledad, Atlántico, siendo las ____________________ del día ____________________, en el espacio correspondiente a la asignatura de ____________________, se procede a registrar la novedad de convivencia escolar correspondiente al estudiante ____________________, identificado con documento de identidad Nro ____________________, matriculado en el grado ____________________, bajo el reporte del docente / directivo ____________________.
-
-   Descripción objetiva de los hechos
-   ________________________________________________________________________________________________________________________
-   ________________________________________________________________________________________________________________________
-
-   Descargos del estudiante
-   En ejercicio de su derecho al debido proceso y a la defensa (Artículo 29 de la Constitución Política de Colombia), el estudiante manifiesta:
-   ________________________________________________________________________________________________________________________
-
-   Acuerdos y compromisos pedagógicos y pedagógico-restaurativos
-   1. ____________________________________________________________________________________________________________________
-   2. ____________________________________________________________________________________________________________________
-   3. ____________________________________________________________________________________________________________________
-
-   El presente registro queda integrado formalmente en el expediente digital del estudiante dentro del repositorio institucional correspondiente al presente año escolar.
-
-   Lugar y fecha de diligenciamiento: Soledad, Atlántico, ____________________
-
-   ____________________________________________________
-   Firma del Estudiante
-   Documento de Identidad Nro ____________________
-
-   ____________________________________________________
-   Firma del Acudiente / Representante Legal
-   Documento de Identidad Nro ____________________
-
-   ____________________________________________________
-   Firma del Docente Reportante / Coordinación
+5. Modelo de Documento Digital Sugerido:
+   Inicia esta sección obligatoriamente con el título en mayúsculas (ej. "ACTA DE COMPROMISO Y DESCARGOS ESTUDIANTILES" o "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA ESCOLAR") y genera inmediatamente la plantilla redactada o con líneas de subrayado reales usando guiones bajos (`____________________`).
 
 Reglas estrictas de formato para el documento digital:
-- Este sistema es 100% digital para el archivo y repositorio institucional por año escolar. Queda ESTRICTAMENTE PROHIBIDO mencionar que el documento debe ser impreso, firmado en papel o presentado en físico.
-- En la Opción Automática, integra todos los datos suministrados en la redacción continua, sin recargar con negritas ni mayúsculas sostenidas.
-- En la Opción Manual (Plantilla en blanco), utiliza siempre las líneas con guiones bajos institucionales (`____________________`).
-- No incluyas meta-etiquetas ni subtítulos innecesarios dentro del cuerpo del documento.
+- Queda prohibido mencionar que el documento debe ser impreso o firmado en físico.
+- Utiliza siempre líneas con guiones bajos institucionales (`____________________`) para los campos vacíos.
 - Los compromisos o acuerdos deben representarse estrictamente como una lista numerada secuencial (1., 2., 3.).
-- Mantén un tono formal, institucional y cercano.
-
-Estructura de la respuesta cuando los datos están completos (5 PUNTOS):
-1. Resumen de la situación: Síntesis objetiva integrando los datos recolectados.
-2. Clasificación de la falta (Según el Manual de Convivencia y Ley 1620 de 2013):
-   - Situación Tipo I (Leve): Conflictos manejados inadecuadamente o faltas menores a los deberes.
-   - Situación Tipo II (Grave): Acoso escolar (bullying), ciberacoso o agresiones físicas/verbales sin incapacidad médica.
-   - Situación Tipo III (Gravísima): Presuntos delitos penales o agresiones físicas con incapacidad médica.
-3. Procedimiento institucional: Protocolo a aplicar según el nivel de falta.
-4. Garantías y Debido Proceso: Derechos aplicables protegidos por el Artículo 29 de la Constitución Política.
-5. Modelo de Documento Digital Sugerido:
-   - Si el perfil es Estudiante o Acudiente: Inicia con "ACTA DE COMPROMISO Y DESCARGOS ESTUDIANTILES" y redacta el modelo integrando todos los datos en la narración.
-   - Si el perfil es Docente / Directivo: Inicia con "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA ESCOLAR" incorporando al inicio los datos de la novedad y la descripción de los hechos con compromisos numerados.
-
-Bloque final de firmas para el documento digital:
-  Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
-  
-____________________________________________________
-Firma del Estudiante
-Documento de Identidad Nro [Documento suministrado]
-
-
-____________________________________________________
-Firma del Acudiente / Representante Legal
-Documento de Identidad Nro ____________________
-
-
-____________________________________________________
-Firma del Docente Reportante / Coordinación
+- Cierra siempre con el bloque formal de firmas utilizando `____________________`.
 """
+
 WELCOME_MESSAGE = f"""
 Saludos. Bienvenido(a) al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón.
 
 Sesión iniciada como: **{user_role}**.
 
-Este portal brinda orientación sobre el protocolo disciplinario institucional, el marco legal colombiano y el debido proceso.
-
 Por favor, seleccione una de las situaciones predeterminadas a continuación o redacte detalladamente lo sucedido en la casilla de texto inferior.
 """
 
-# Inicialización del historial de chat
 if "messages" not in st.session_state or len(st.session_state.messages) == 0:
     st.session_state.messages = [
         {"role": "assistant", "content": WELCOME_MESSAGE}
     ]
 
-# Renderizar historial de mensajes y botón de descarga para cada respuesta del asistente
 for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-        # Generación del botón de descarga directa en Word únicamente cuando la respuesta contenga el documento oficial al finalizar
+        contenido_upper = msg["content"].upper()
         if (
             msg["role"] == "assistant"
             and idx > 0
             and (
-                "ACTA DE COMPROMISO" in msg["content"]
-                or "REGISTRO EN EL OBSERVADOR" in msg["content"]
-                or "MODELO DE DOCUMENTO" in msg["content"]
+                "ACTA" in contenido_upper
+                or "REGISTRO" in contenido_upper
+                or "PLANTILLA" in contenido_upper
+                or "DOCUMENTO" in contenido_upper
             )
         ):
             if HAS_DOCX:
                 docx_bytes = generar_documento_word(msg["content"])
                 st.download_button(
-                    label=(
-                        "📄 Descargar Documento Oficial en Microsoft Word (.docx)"
-                    ),
+                    label="📄 Descargar Documento Oficial en Microsoft Word (.docx)",
                     data=docx_bytes,
-                    file_name=(
-                        f"Documento_Convivencia_SagradoCorazon_{idx}.docx"
-                    ),
-                    mime=(
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    ),
+                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     key=f"dl_word_{idx}",
                 )
             else:
                 st.download_button(
                     label="📄 Guardar texto (.txt)",
                     data=msg["content"],
-                    file_name=(
-                        f"Documento_Convivencia_SagradoCorazon_{idx}.txt"
-                    ),
+                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
                     mime="text/plain",
                     key=f"dl_txt_{idx}",
                 )
 
-# Opciones predefinidas rápidas al inicio de la conversación
 selected_option = None
 if len(st.session_state.messages) <= 1:
     st.markdown("**Seleccione el tipo de situación o escriba su caso abajo:**")
@@ -644,7 +508,7 @@ if len(st.session_state.messages) <= 1:
         if st.button("Presunto Acoso Escolar (Bullying)"):
             selected_option = "Se presenta una situación reiterada de presunto acoso escolar (bullying) o ciberacoso."
         if st.button("Fraude académico / Plagio"):
-            selected_option = "Se reporta una falta relacionada con fraude académico o plagio en evaluación durante la clase de la asignatura correspondiente."
+            selected_option = "Se reporta una falta relacionada con fraude académico o plagio en evaluación durante la clase."
         if st.button("Desacato o falta de respeto a docente"):
             selected_option = "Se presentó un acto de desobediencia o falta de respeto verbal hacia un docente durante el desarrollo de la clase."
 
@@ -656,11 +520,10 @@ if len(st.session_state.messages) <= 1:
         if st.button("Uso no autorizado de celular/equipos"):
             selected_option = "Se reporta el uso no autorizado de teléfono celular o dispositivos electrónicos durante la jornada escolar."
         if st.button("Evasión de clase / Ausencia en aula"):
-            selected_option = "El estudiante ingresó a la institución pero evadió la clase o se ausentó del aula entre determinadas horas de la jornada escolar."
+            selected_option = "El estudiante ingresó a la institución pero evadió la clase o se ausentó del aula."
         if st.button("Daño a propiedad institucional"):
             selected_option = "Se reportan daños materiales a los pupitres, paredes u otros bienes de la institución."
 
-# Captura de mensaje del usuario
 user_input = st.chat_input("Escriba aquí los hechos de la situación a evaluar...")
 prompt = selected_option or user_input
 
@@ -703,9 +566,7 @@ if prompt:
         error_msg = str(e)
         if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
             st.warning(
-                "⚠️ El servicio ha alcanzado el límite de consultas por minuto"
-                " de la capa gratuita. Por favor, espere 30 a 40 segundos e"
-                " intente de nuevo."
+                "⚠️ El servicio ha alcanzado el límite de consultas por minuto de la capa gratuita. Por favor, espere 30 a 40 segundos e intente de nuevo."
             )
         else:
             st.error(f"Error de comunicación con el servicio: {e}")
