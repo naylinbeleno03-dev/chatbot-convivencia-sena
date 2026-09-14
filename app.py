@@ -437,6 +437,12 @@ with st.sidebar:
 
     st.markdown("---")
 
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### Biblioteca Virtual")
+    st.sidebar.markdown(
+    "[Abrir Repositorio"
+    " Digital](https://repositorioconvivencia-k3hz5bcgykhxqwn6gn7cjh.streamlit.app/)"
+    
     # Consulta de Marco Legal e Institucional con ENLACES DIRECTOS
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
