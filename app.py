@@ -433,7 +433,7 @@ with st.sidebar:
 user_role = st.selectbox(
     "Perfil del Consultante:",
     ["Estudiante", "Acudiente / Padre de Familia", "Docente / Directivo"],
-)
+        )
 
         st.sidebar.markdown("---")
         st.sidebar.markdown("### Biblioteca Virtual")
