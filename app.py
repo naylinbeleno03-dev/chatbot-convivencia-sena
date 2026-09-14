@@ -429,7 +429,7 @@ with st.sidebar:
     if not api_key:
         api_key = st.text_input("Clave API de Gemini", type="password")
 
-    # Selector de Rol del Usuario
+# Selector de Rol del Usuario
     user_role = st.selectbox(
         "Perfil del Consultante:",
         ["Estudiante", "Acudiente / Padre de Familia", "Docente / Directivo"],
@@ -440,8 +440,8 @@ with st.sidebar:
     st.sidebar.markdown("---")
     st.sidebar.markdown("### Biblioteca Virtual")
     st.sidebar.markdown(
-    "[Abrir Repositorio"
-    " Digital](https://repositorioconvivencia-k3hz5bcgykhxqwn6gn7cjh.streamlit.app/)"
+        "[Abrir Repositorio"
+        " Digital](https://repositorioconvivencia-k3hz5bcgykhxqwn6gn7cjh.streamlit.app/)"
     )
     
     # Consulta de Marco Legal e Institucional con ENLACES DIRECTOS
