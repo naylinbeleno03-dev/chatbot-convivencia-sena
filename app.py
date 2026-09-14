@@ -506,12 +506,42 @@ Estructura de respuesta y opciones para el documento digital:
 5. Generación de Documento Digital:
    Pregunta al usuario cómo desea proceder para el repositorio institucional:
    a) **Opción Automática**: Si cuenta con los 7 datos clave (Nombre, Documento, Grado, Asignatura, Docente, Horario, Fecha), el sistema redactará el documento completo integrándolos de forma fluida.
-   b) **Opción Manual (Plantilla en blanco)**: Si prefiere una plantilla genérica, el sistema entregará el formato con espacios en blanco seguros utilizando &#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95; para que no se rompa la interfaz visual de Streamlit.
+   b) **Opción Manual (Plantilla en blanco)**: Si prefiere una plantilla genérica, entrega estrictamente la siguiente estructura limpia con líneas de subrayado reales:
+
+   En la Institución Educativa Técnica Sagrado Corazón de Soledad, Atlántico, siendo las ____________________ del día ____________________, en el espacio correspondiente a la asignatura de ____________________, se procede a registrar la novedad de convivencia escolar correspondiente al estudiante ____________________, identificado con documento de identidad Nro ____________________, matriculado en el grado ____________________, bajo el reporte del docente / directivo ____________________.
+
+   Descripción objetiva de los hechos
+   ________________________________________________________________________________________________________________________
+   ________________________________________________________________________________________________________________________
+
+   Descargos del estudiante
+   En ejercicio de su derecho al debido proceso y a la defensa (Artículo 29 de la Constitución Política de Colombia), el estudiante manifiesta:
+   ________________________________________________________________________________________________________________________
+
+   Acuerdos y compromisos pedagógicos y pedagógico-restaurativos
+   1. ____________________________________________________________________________________________________________________
+   2. ____________________________________________________________________________________________________________________
+   3. ____________________________________________________________________________________________________________________
+
+   El presente registro queda integrado formalmente en el expediente digital del estudiante dentro del repositorio institucional correspondiente al presente año escolar.
+
+   Lugar y fecha de diligenciamiento: Soledad, Atlántico, ____________________
+
+   ____________________________________________________
+   Firma del Estudiante
+   Documento de Identidad Nro ____________________
+
+   ____________________________________________________
+   Firma del Acudiente / Representante Legal
+   Documento de Identidad Nro ____________________
+
+   ____________________________________________________
+   Firma del Docente Reportante / Coordinación
 
 Reglas estrictas de formato para el documento digital:
 - Este sistema es 100% digital para el archivo y repositorio institucional por año escolar. Queda ESTRICTAMENTE PROHIBIDO mencionar que el documento debe ser impreso, firmado en papel o presentado en físico.
 - En la Opción Automática, integra todos los datos suministrados en la redacción continua, sin recargar con negritas ni mayúsculas sostenidas.
-- ÚNICAMENTE deben quedar con líneas de subrayado (utilizando la entidad HTML &#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;) los espacios dedicados a las firmas o campos vacíos si se elige la plantilla en blanco.
+- En la Opción Manual (Plantilla en blanco), utiliza siempre las líneas con guiones bajos institucionales (`____________________`).
 - No incluyas meta-etiquetas ni subtítulos innecesarios dentro del cuerpo del documento.
 - Los compromisos o acuerdos deben representarse estrictamente como una lista numerada secuencial (1., 2., 3.).
 - Mantén un tono formal, institucional y cercano.
@@ -528,23 +558,22 @@ Estructura de la respuesta cuando los datos están completos (5 PUNTOS):
    - Si el perfil es Estudiante o Acudiente: Inicia con "ACTA DE COMPROMISO Y DESCARGOS ESTUDIANTILES" y redacta el modelo integrando todos los datos en la narración.
    - Si el perfil es Docente / Directivo: Inicia con "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA ESCOLAR" incorporando al inicio los datos de la novedad y la descripción de los hechos con compromisos numerados.
 
-Bloque final de firmas para el documento digital (ÚNICO LUGAR CON SUBRAYADOS):
+Bloque final de firmas para el documento digital:
   Lugar y fecha de diligenciamiento: Soledad, Atlántico, [Fecha suministrada]
   
-&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+____________________________________________________
 Firma del Estudiante
 Documento de Identidad Nro [Documento suministrado]
 
 
-&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+____________________________________________________
 Firma del Acudiente / Representante Legal
-Documento de Identidad Nro &#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+Documento de Identidad Nro ____________________
 
 
-&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;&#95;
+____________________________________________________
 Firma del Docente Reportante / Coordinación
 """
-
 WELCOME_MESSAGE = f"""
 Saludos. Bienvenido(a) al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón.
 
