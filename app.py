@@ -432,7 +432,7 @@ with st.sidebar:
     st.markdown("3. Descargue el documento oficial en Word.")
 
     st.markdown("---")
-    if st.button("🔄 Reiniciar consulta", use_container_width=True):
+    if st.button(" Reiniciar consulta", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
