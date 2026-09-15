@@ -37,7 +37,7 @@ st.set_page_config(
     layout="centered",
 )
 
-# Estilos CSS personalizados
+# Estilos CSS personalizados y optimizados para la barra lateral
 st.markdown(
     """
     <style>
@@ -48,7 +48,7 @@ st.markdown(
     }
     
     section[data-testid="stSidebar"] {
-        background-color: #475569;
+        background-color: #1E293B;
         border-right: 1px solid #334155;
     }
 
@@ -57,34 +57,39 @@ st.markdown(
     section[data-testid="stSidebar"] h3,
     section[data-testid="stSidebar"] p,
     section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] li,
-    section[data-testid="stSidebar"] a {
+    section[data-testid="stSidebar"] span {
         color: #FFFFFF !important;
     }
 
-    section[data-testid="stSidebar"] details {
+    /* Estilo robusto para el expander en la barra lateral */
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] {
         background-color: #334155 !important;
-        border: 1px solid #64748B !important;
+        border: 1px solid #475569 !important;
         border-radius: 8px !important;
-        padding: 6px 10px !important;
+        margin-top: 10px;
+        margin-bottom: 10px;
     }
 
-    section[data-testid="stSidebar"] summary {
-        color: #FFFFFF !important;
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] details {
         background-color: #334155 !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
+        color: #FFFFFF !important;
         font-weight: 600 !important;
     }
 
-    section[data-testid="stSidebar"] details[open] {
-        background-color: #334155 !important;
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] summary:hover {
+        color: #FDE047 !important;
     }
 
-    section[data-testid="stSidebar"] details p,
-    section[data-testid="stSidebar"] details li {
-        color: #FFFFFF !important;
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] p,
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] li {
+        color: #F1F5F9 !important;
+        font-size: 0.9rem !important;
     }
 
-    section[data-testid="stSidebar"] details a {
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] a {
         color: #FDE047 !important;
         text-decoration: underline !important;
         font-weight: 600 !important;
@@ -113,26 +118,22 @@ st.markdown(
         font-size: 0.95rem !important;
     }
 
-    section[data-testid="stSidebar"] .stButton>button,
-    section[data-testid="stSidebar"] .stButton>button p,
-    section[data-testid="stSidebar"] .stButton>button div,
-    section[data-testid="stSidebar"] .stButton>button span {
+    /* Botón de la barra lateral */
+    section[data-testid="stSidebar"] .stButton>button {
         background-color: #FFFFFF !important;
-        color: #1F2937 !important;
+        color: #0F172A !important;
         border: 1px solid #FFFFFF !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
         transition: all 0.3s ease !important;
         width: 100%;
+        padding: 8px 12px;
     }
 
-    section[data-testid="stSidebar"] .stButton>button:hover,
-    section[data-testid="stSidebar"] .stButton>button:hover p,
-    section[data-testid="stSidebar"] .stButton>button:hover div,
-    section[data-testid="stSidebar"] .stButton>button:hover span {
-        background-color: #000000 !important;
+    section[data-testid="stSidebar"] .stButton>button:hover {
+        background-color: #0F172A !important;
         color: #FFFFFF !important;
-        border-color: #000000 !important;
+        border-color: #0F172A !important;
     }
 
     .stMainBlockContainer div.stButton > button {
@@ -202,7 +203,7 @@ st.markdown(
     }
 
     hr {
-        border-color: #64748B;
+        border-color: #475569;
     }
     </style>
 """,
@@ -380,7 +381,7 @@ def generar_documento_word(texto_contenido):
     return buffer.getvalue()
 
 
-# Barra lateral izquierda
+# Barra lateral izquierda (con componentes garantizados y visibles)
 with st.sidebar:
     st.header("Configuración del Sistema")
 
@@ -398,31 +399,36 @@ with st.sidebar:
         "[Abrir Repositorio Digital](https://repositorioconvivencia-k3hz5bcgykhxqwn6gn7cjh.streamlit.app/)"
     )
     
-with st.expander("Ver Marco Legal e Institucional"):
-    st.markdown(
-        f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso)."
-    )
-    st.markdown(            f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de Educación."
-    )
-    st.markdown(
-        f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Código de la Infancia y la Adolescencia."
-    )
-    st.markdown(
-        f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Sistema Nacional de Convivencia Escolar."
-    )
-    st.markdown(
-        f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Decreto Reglamentario de la Ley 1620."
-    )
-    st.markdown(
-        f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Pacto de Convivencia Institucional."
-    )
+    # Expander con el marco legal con redacción formal mejorada
+    with st.expander("Ver Marco Legal e Institucional"):
+        st.markdown(
+            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso)."
+        )
+        st.markdown(
+            f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de Educación."
+        )
+        st.markdown(
+            f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Código de la Infancia y la Adolescencia."
+        )
+        st.markdown(
+            f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Sistema Nacional de Convivencia Escolar."
+        )
+        st.markdown(
+            f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Decreto Reglamentario de la Ley 1620."
+        )
+        st.markdown(
+            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Pacto de Convivencia Institucional."
+        )
+
     st.markdown("---")
     st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación.")
     st.markdown("2. Elija si desea el acta automática (dando sus datos) o en blanco.")
     st.markdown("3. Descargue el documento oficial en Word.")
 
-    if st.button("Reiniciar consulta"):
+    st.markdown("---")
+    # Botón de reinicio claramente visible y posicionado
+    if st.button("🔄 Reiniciar consulta", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
