@@ -37,7 +37,7 @@ st.set_page_config(
     layout="centered",
 )
 
-# Estilos CSS personalizados y optimizados para la barra lateral
+# Estilos CSS personalizados y optimizados
 st.markdown(
     """
     <style>
@@ -47,6 +47,7 @@ st.markdown(
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
+    /* Barra lateral y todos sus textos y elementos en blanco */
     section[data-testid="stSidebar"] {
         background-color: #1E293B;
         border-right: 1px solid #334155;
@@ -57,7 +58,9 @@ st.markdown(
     section[data-testid="stSidebar"] h3,
     section[data-testid="stSidebar"] p,
     section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] span {
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] li,
+    section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] {
         color: #FFFFFF !important;
     }
 
@@ -118,7 +121,7 @@ st.markdown(
         font-size: 0.95rem !important;
     }
 
-    /* Botón de la barra lateral */
+    /* Botón de la barra lateral (Fondo blanco, texto oscuro y legible) */
     section[data-testid="stSidebar"] .stButton>button {
         background-color: #FFFFFF !important;
         color: #0F172A !important;
@@ -130,10 +133,20 @@ st.markdown(
         padding: 8px 12px;
     }
 
+    section[data-testid="stSidebar"] .stButton>button p,
+    section[data-testid="stSidebar"] .stButton>button span {
+        color: #0F172A !important;
+    }
+
     section[data-testid="stSidebar"] .stButton>button:hover {
         background-color: #0F172A !important;
         color: #FFFFFF !important;
         border-color: #0F172A !important;
+    }
+
+    section[data-testid="stSidebar"] .stButton>button:hover p,
+    section[data-testid="stSidebar"] .stButton>button:hover span {
+        color: #FFFFFF !important;
     }
 
     .stMainBlockContainer div.stButton > button {
@@ -221,12 +234,10 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Obtener clave API automáticamente si está guardada en Secrets o pedirla
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
 
 def limpiar_texto_para_word(texto: str) -> str:
-    """Limpia viñetas de markdown manteniendo intactos los guiones bajos y espacios."""
     if not texto:
         return ""
     texto = re.sub(r"^\s*[\*\-]\s+", "", texto, flags=re.MULTILINE)
@@ -234,7 +245,6 @@ def limpiar_texto_para_word(texto: str) -> str:
 
 
 def extraer_solo_documento(texto_contenido: str) -> str:
-    """Extrae exclusivamente el modelo o plantilla de documento para el archivo Word digital."""
     if not texto_contenido:
         return ""
 
@@ -278,7 +288,6 @@ def generar_documento_word(texto_contenido):
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-        # Encabezado formal institucional único
         header = section.header
         p_head = header.paragraphs[0]
         p_head.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -314,7 +323,6 @@ def generar_documento_word(texto_contenido):
         r_head.font.bold = True
         r_head.font.color.rgb = RGBColor(100, 116, 139)
 
-        # Pie de página
         footer = section.footer
         p_foot = footer.paragraphs[0]
         p_foot.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -326,7 +334,6 @@ def generar_documento_word(texto_contenido):
         r_foot.font.italic = True
         r_foot.font.color.rgb = RGBColor(100, 116, 139)
 
-    # Cuerpo del documento limpio
     lineas = texto_documento.split("\n")
     for linea in lineas:
         linea_limpia = limpiar_texto_para_word(linea)
@@ -337,7 +344,6 @@ def generar_documento_word(texto_contenido):
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
 
-        # Detectar si es el título principal del acta
         if (
             "ACTA" in linea.upper()
             or "REGISTRO" in linea.upper()
@@ -381,7 +387,7 @@ def generar_documento_word(texto_contenido):
     return buffer.getvalue()
 
 
-# Barra lateral izquierda (con componentes garantizados y visibles)
+# Barra lateral izquierda
 with st.sidebar:
     st.header("Configuración del Sistema")
 
@@ -399,7 +405,6 @@ with st.sidebar:
         "[Abrir Repositorio Digital](https://repositorioconvivencia-k3hz5bcgykhxqwn6gn7cjh.streamlit.app/)"
     )
     
-    # Expander con el marco legal con redacción formal mejorada
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
             f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso)."
@@ -427,7 +432,6 @@ with st.sidebar:
     st.markdown("3. Descargue el documento oficial en Word.")
 
     st.markdown("---")
-    # Botón de reinicio claramente visible y posicionado
     if st.button("🔄 Reiniciar consulta", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
@@ -452,7 +456,7 @@ REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
      ACTA DE COMPROMISO ESTUDIANTIL
 
    - Fecha estructurada: 
-     Soledad, _____ de ____________ del 2026 (o con el día/mes/año indicado).
+     Soledad, _____ de ____________ del 2026.
 
    - Párrafo introductorio formal:
      Yo, [Nombre del estudiante o línea de subrayado], estudiante del grado [Grado] sección [Sección], prometo solemnemente tener una conducta correcta, responsable, respetuosa, acudir puntualmente a mis horas de clase y cumplir con todas las actividades académicas y de convivencia que me corresponden como estudiante de la Institución Educativa Técnica Sagrado Corazón.
@@ -593,3 +597,4 @@ if prompt:
             )
         else:
             st.error(f"Error de comunicación con el servicio: {e}")
+            
