@@ -422,7 +422,7 @@ with st.sidebar:
             f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Decreto Reglamentario de la Ley 1620."
         )
         st.markdown(
-            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Pacto de Convivencia Institucional."
+            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Manual Institucional."
         )
 
     st.markdown("---")
@@ -432,7 +432,7 @@ with st.sidebar:
     st.markdown("3. Descargue el documento oficial en Word generado al final.")
 
     st.markdown("---")
-    if st.button("🔄 Reiniciar consulta", use_container_width=True):
+    if st.button("Reiniciar consulta", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
