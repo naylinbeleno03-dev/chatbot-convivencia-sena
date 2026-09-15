@@ -187,45 +187,26 @@ def limpiar_texto_para_word(texto: str) -> str:
     return texto_limpio.strip()
 
 
-def extraer_solo_documento(texto_contenido: str) -> str:
+def extraer_acta(texto_contenido: str) -> str:
     if not texto_contenido:
         return ""
-
-    patrones = [
-        r"(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA.*)",
-        r"(REGISTRO EN EL OBSERVADOR.*)",
-        r"(ACTA DE COMPROMISO ESTUDIANTIL.*)",
-        r"(ACTA DE COMPROMISO.*)",
-        r"(MODELO DE CARTA.*)",
-        r"(MODELO DE REGISTRO.*)",
-        r"(REGISTRO EN EL OBSERVADOR ESCOLAR.*)",
-        r"(CARTA DE DESCARGOS.*)",
-        r"(CITACIÓN A ACUDIENTE.*)",
-        r"(5\.\s*MODELO.*)",
-        r"(5\.\s*DOCUMENTO.*)",
-        r"(5\.\s*ACTA.*)",
-        r"(5\.\s*REGISTRO.*)",
-    ]
-
-    for patron in patrones:
-        match = re.search(patron, texto_contenido, re.IGNORECASE | re.DOTALL)
-        if match:
-            texto_extraido = match.group(1)
-            lineas = texto_extraido.split("\n")
-            if re.match(
-                r"^5\.\s*(MODELO|DOCUMENTO|PLANTILLA|ACTA|REGISTRO)",
-                lineas[0].strip(),
-                re.IGNORECASE,
-            ):
-                texto_extraido = "\n".join(lineas[1:])
-            return texto_extraido.strip()
-
+    match = re.search(r"(ACTA DE COMPROMISO ESTUDIANTIL.*?)(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA|$)", texto_contenido, re.IGNORECASE | re.DOTALL)
+    if match:
+        return match.group(1).strip()
     return texto_contenido.strip()
 
 
-def generar_documento_word(texto_contenido):
+def extraer_observador(texto_contenido: str) -> str:
+    if not texto_contenido:
+        return ""
+    match = re.search(r"(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA.*)", texto_contenido, re.IGNORECASE | re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return ""
+
+
+def generar_documento_word(texto_documento):
     doc = Document()
-    texto_documento = extraer_solo_documento(texto_contenido)
 
     for section in doc.sections:
         section.top_margin = Inches(0.8)
@@ -342,17 +323,15 @@ def generar_documento_word(texto_contenido):
     return buffer.getvalue()
 
 
-# Barra lateral izquierda
+# Barra lateral izquierda con perfil fijo de Docente / Directivo
 with st.sidebar:
     st.header("Configuración del Sistema")
 
     if not api_key:
         api_key = st.text_input("Clave API de Gemini", type="password")
 
-    user_role = st.selectbox(
-        "Perfil del Consultante:",
-        ["Estudiante", "Acudiente / Padre de Familia", "Docente / Directivo"],
-    )
+    user_role = "Docente / Directivo"
+    st.markdown(f"**Perfil Activo:** {user_role}")
 
     st.markdown("---")
     st.markdown("### Biblioteca Virtual")
@@ -384,50 +363,68 @@ with st.sidebar:
     st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación.")
     st.markdown("2. Responda a la solicitud de datos o elija plantilla en blanco.")
-    st.markdown("3. Descargue el documento oficial en Word generado al final.")
+    st.markdown("3. Descargue el Acta y el Observador de Convivencia en Word generados al final.")
 
     st.markdown("---")
     if st.button("Reiniciar consulta", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
-doc_titulo = "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" if user_role == "Docente / Directivo" else "ACTA DE COMPROMISO ESTUDIANTIL"
-
-SYSTEM_PROMPT = f"""
+SYSTEM_PROMPT = """
 Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
 
-Estás orientando a un usuario con el perfil de: {user_role}.
+Estás orientando a un usuario con el perfil de: Docente / Directivo.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso y el derecho de defensa del estudiante), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de la Institución Educativa Técnica Sagrado Corazón.
 
 REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
-1. **Fase 1 (Análisis Inicial, Derechos de Defensa y Solicitud de Datos - NUNCA GENERES EL DOCUMENTO AQUÍ)**: 
+1. **Fase 1 (Análisis Inicial, Derechos de Defensa y Solicitud de Datos - NUNCA GENERES LOS DOCUMENTOS AQUÍ)**: 
    Cuando el usuario ingrese o seleccione un caso, preséntale ÚNICAMENTE:
    - Resumen breve de la situación reportada.
    - Clasificación de la falta (Tipo I, II o III según Manual de Convivencia y Ley 1620).
    - Procedimiento institucional, **los derechos del estudiante y sus mecanismos de defensa** (derecho a ser escuchado, presentar descargos, aportar pruebas y contradecir en el marco del Debido Proceso del Artículo 29 de la Constitución Política).
-   - **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere el {'Registro en el Observador de Convivencia' if user_role == 'Docente / Directivo' else 'Acta de Compromiso'} completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, curso, número de T.I. - Tarjeta de Identidad y la fecha del hecho o documento), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarla manualmente?"
+   - **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere tanto el Acta de Compromiso como el Registro en el Observador de Convivencia completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, curso, número de T.I. - Tarjeta de Identidad y la fecha del hecho o documento), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarlas manualmente?"
    *¡IMPORTANTE!* En este primer mensaje **NO** debes redactar ni incluir ningún formato de documento. Solo analiza y haz la pregunta.
 
-2. **Fase 2 (Generación del Documento - Únicamente al recibir respuesta del usuario)**: 
-   Solo cuando el usuario indique su preferencia y proporcione los datos (o pida la plantilla en blanco), redactarás y generarás el documento oficial cumpliendo **estrictamente** esta estructura visual y formal basada en los formatos institucionales:
+2. **Fase 2 (Generación de los Documentos - Únicamente al recibir respuesta del usuario)**: 
+   Solo cuando el usuario indique su preferencia y proporcione los datos (o pida la plantilla en blanco con líneas de subrayado), redactarás y generarás **ambos documentos oficiales** (primero el Acta de Compromiso y luego el Registro en el Observador de Convivencia) cumpliendo **estrictamente** esta estructura visual y formal basada en los formatos institucionales:
 
+   ---
+   DOCUMENTO 1:
    - Título centrado: 
-     {doc_titulo}
-
+     ACTA DE COMPROMISO ESTUDIANTIL
    - Fecha estructurada: 
      Soledad, [Fecha proporcionada o líneas de subrayado].
-
    - Párrafo introductorio formal:
-     {'Registro de seguimiento institucional en el observador escolar para el estudiante [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], del curso [Curso]. Se consigna la situación reportada, los descargos y los compromisos pedagógicos en garantía del debido proceso.' if user_role == 'Docente / Directivo' else 'Yo, [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], estudiante del curso [Curso], en ejercicio de mis derechos y del debido proceso, prometo solemnemente tener una conducta correcta, responsable, respetuosa, acudir puntualmente a mis horas de clase y cumplir con todas las actividades académicas y de convivencia que me corresponden como estudiante de la Institución Educativa Técnica Sagrado Corazón.'}
-
-   - Compromisos y observaciones específicos (derivados del caso analizado en lista numerada 1., 2., 3.).
-
-   - Cláusula final:
-     {'En constancia de lo anterior y en aplicación del Manual de Convivencia, se firman las presentes observaciones y seguimiento.' if user_role == 'Docente / Directivo' else 'En caso de no cumplir con los compromisos establecidos, se me aplicarán las sanciones y correctivos correspondientes conforme al Manual de Convivencia institucional, garantizando en todo momento el derecho de defensa.'}
-
+     Yo, [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], estudiante del curso [Curso], en ejercicio de mis derechos y del debido proceso, prometo solemnemente tener una conducta correcta, responsable, respetuosa, acudir puntualmente a mis horas de clase y cumplir con todas las actividades académicas y de convivencia que me corresponden como estudiante de la Institución Educativa Técnica Sagrado Corazón.
+   - Compromisos específicos (derivados del caso analizado en lista numerada 1., 2., 3., o líneas de subrayado).
+   - Cláusula de incumplimiento:
+     En caso de no cumplir con los compromisos establecidos, se me aplicarán las sanciones y correctivos correspondientes conforme al Manual de Convivencia institucional, garantizando en todo momento el derecho de defensa.
    - Bloque de Firmas profesional al pie:
-     {'''_____________________________________
+     _____________________________________
+     Firma del Estudiante
+     T.I. ________________________________
+
+     _____________________________________
+     Firma del Acudiente / Representante
+     C.C. ________________________________
+
+     _____________________________________
+     Docente Tutor / Coordinador(a)
+
+   ---
+   DOCUMENTO 2:
+   - Título centrado: 
+     REGISTRO EN EL OBSERVADOR DE CONVIVENCIA
+   - Fecha estructurada: 
+     Soledad, [Fecha proporcionada o líneas de subrayado].
+   - Párrafo introductorio formal:
+     Registro de seguimiento institucional en el observador escolar para el estudiante [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], del curso [Curso]. Se consigna la situación reportada, los descargos y los compromisos pedagógicos en garantía del debido proceso.
+   - Observaciones y compromisos específicos (derivados del caso analizado en lista numerada 1., 2., 3., o líneas de subrayado).
+   - Cláusula final:
+     En constancia de lo anterior y en aplicación del Manual de Convivencia, se firman las presentes observaciones y seguimiento.
+   - Bloque de Firmas profesional al pie:
+     _____________________________________
      Firma del Docente / Directivo Responsable
      C.C. ________________________________
 
@@ -437,22 +434,13 @@ REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
 
      _____________________________________
      Firma del Acudiente / Representante
-     C.C. ________________________________''' if user_role == 'Docente / Directivo' else '''_____________________________________
-     Firma del Estudiante
-     T.I. ________________________________
-
-     _____________________________________
-     Firma del Acudiente / Representante
      C.C. ________________________________
-
-     _____________________________________
-     Docente Tutor / Coordinador(a)'''}
 """
 
-WELCOME_MESSAGE = f"""
+WELCOME_MESSAGE = """
 Saludos. Bienvenido(a) al Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón.
 
-Sesión iniciada como: **{user_role}**.
+Sesión iniciada como: **Docente / Directivo**.
 
 Por favor, seleccione una de las situaciones predeterminadas a continuación o redacte detalladamente lo sucedido en la casilla de texto inferior.
 """
@@ -468,33 +456,47 @@ for idx, msg in enumerate(st.session_state.messages):
         st.markdown(texto_limpio_html)
 
         contenido_upper = msg["content"].upper()
-        # Condición estricta: Solo muestra el botón de descarga si es Fase 2 (contiene el documento final y NO la pregunta de Fase 1)
+        # Condición estricta: Solo muestra los botones de descarga si es Fase 2 (contiene ambos documentos y NO la pregunta de Fase 1)
         is_document_generated = (
             msg["role"] == "assistant"
             and idx > 0
-            and (
-                "ACTA DE COMPROMISO ESTUDIANTIL" in contenido_upper
-                or "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" in contenido_upper
-            )
-            and ("FIRMA" in contenido_upper or "_____________________________________" in msg["content"])
+            and "ACTA DE COMPROMISO ESTUDIANTIL" in contenido_upper
+            and "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" in contenido_upper
             and "¿DESEA QUE GENERE" not in contenido_upper
         )
 
         if is_document_generated:
             if HAS_DOCX:
-                docx_bytes = generar_documento_word(msg["content"])
-                st.download_button(
-                    label="📄 Descargar Documento Oficial en Microsoft Word (.docx)",
-                    data=docx_bytes,
-                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    key=f"dl_word_{idx}",
-                )
+                st.markdown("---")
+                st.markdown("**📥 Descargar Documentos Oficiales Generados:**")
+                col_dl1, col_dl2 = st.columns(2)
+                
+                with col_dl1:
+                    docx_acta = generar_documento_word(extraer_acta(msg["content"]))
+                    st.download_button(
+                        label="📄 Descargar Acta de Compromiso (.docx)",
+                        data=docx_acta,
+                        file_name=f"Acta_Compromiso_SagradoCorazon_{idx}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        key=f"dl_acta_{idx}",
+                        use_container_width=True,
+                    )
+                
+                with col_dl2:
+                    docx_obs = generar_documento_word(extraer_observador(msg["content"]))
+                    st.download_button(
+                        label="📄 Descargar Observador de Convivencia (.docx)",
+                        data=docx_obs,
+                        file_name=f"Observador_Convivencia_SagradoCorazon_{idx}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        key=f"dl_obs_{idx}",
+                        use_container_width=True,
+                    )
             else:
                 st.download_button(
-                    label="📄 Guardar texto (.txt)",
+                    label="📄 Guardar texto completo (.txt)",
                     data=msg["content"],
-                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
+                    file_name=f"Documentos_Convivencia_SagradoCorazon_{idx}.txt",
                     mime="text/plain",
                     key=f"dl_txt_{idx}",
                 )
