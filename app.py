@@ -407,7 +407,7 @@ with st.sidebar:
     
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
-            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso) y Derechos Fundamentales."
+            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso)."
         )
         st.markdown(
             f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de Educación."
@@ -422,7 +422,7 @@ with st.sidebar:
             f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Decreto Reglamentario de la Ley 1620."
         )
         st.markdown(
-            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Manual Institucional."
+            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Pacto de Convivencia Institucional."
         )
 
     st.markdown("---")
@@ -432,7 +432,7 @@ with st.sidebar:
     st.markdown("3. Descargue el documento oficial en Word generado al final.")
 
     st.markdown("---")
-    if st.button("Reiniciar consulta", use_container_width=True):
+    if st.button("🔄 Reiniciar consulta", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
