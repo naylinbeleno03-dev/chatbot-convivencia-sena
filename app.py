@@ -238,6 +238,7 @@ def extraer_solo_documento(texto_contenido: str) -> str:
         return ""
 
     patrones = [
+        r"(ACTA DE COMPROMISO ESTUDIANTIL.*)",
         r"(ACTA DE COMPROMISO.*)",
         r"(MODELO DE CARTA.*)",
         r"(MODELO DE REGISTRO.*)",
@@ -324,7 +325,7 @@ def generar_documento_word(texto_contenido):
         r_foot.font.italic = True
         r_foot.font.color.rgb = RGBColor(100, 116, 139)
 
-    # Cuerpo del documento limpio sin duplicar encabezados ni exceso de negritas
+    # Cuerpo del documento limpio
     lineas = texto_documento.split("\n")
     for linea in lineas:
         linea_limpia = limpiar_texto_para_word(linea)
@@ -357,10 +358,10 @@ def generar_documento_word(texto_contenido):
             run = p.add_run(linea_limpia.replace("**", ""))
             run.font.size = Pt(10)
             run.font.name = "Arial"
-            run.font.bold = "FIRMA" in linea.upper()
+            run.font.bold = "FIRMA" in linea.upper() or "ESTUDIANTE" in linea.upper()
             run.font.color.rgb = RGBColor(31, 41, 55)
             if "________________" in linea:
-                p.paragraph_format.space_before = Pt(30)
+                p.paragraph_format.space_before = Pt(25)
                 p.paragraph_format.space_after = Pt(2)
             else:
                 p.paragraph_format.space_before = Pt(2)
@@ -399,7 +400,7 @@ with st.sidebar:
     
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
-            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Due Proceso)."
+            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Debido Proceso)."
         )
         st.markdown(f"* **[Ley 115 de 1994]({URL_LEY_115})**: Educación.")
         st.markdown(f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Infancia.")
@@ -410,7 +411,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación.")
-    st.markdown("2. Responda si desea el documento automático o en plantilla en blanco.")
+    st.markdown("2. Elija si desea el acta automática (dando sus datos) o en blanco.")
     st.markdown("3. Descargue el documento oficial en Word.")
 
     if st.button("Reiniciar consulta"):
@@ -424,21 +425,38 @@ Estás orientando a un usuario con el perfil de: {user_role}.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de la Institución Educativa Técnica Sagrado Corazón.
 
-Estructura de tu análisis inicial del caso:
-1. Resumen de la situación reportada.
-2. Clasificación de la falta (Según el Manual de Convivencia y Ley 1620 de 2013):
-   - Situación Tipo I (Leve)
-   - Situación Tipo II (Grave)
-   - Situación Tipo III (Gravísima)
-3. Procedimiento institucional aplicable.
-4. Garantías y Debido Proceso (Artículo 29 de la Constitución Política).
-5. **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere el documento oficial completando automáticamente los datos de este caso, o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarla manualmente?"
+REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
+1. **Fase 1 (Análisis Inicial y Solicitud de Elección)**: Cuando el usuario ingrese o seleccione un caso, presenta únicamente:
+   - Resumen breve de la situación reportada.
+   - Clasificación de la falta (Tipo I, II o III según Manual de Convivencia y Ley 1620).
+   - Procedimiento institucional y Debido Proceso (Artículo 29 de la Constitución Política).
+   - **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere el Acta de Compromiso completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, grado y sección), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarla manualmente?"
 
-**Reglas estrictas para cuando el usuario responda cómo desea el documento**:
-- No repitas el membrete o nombre del colegio en el cuerpo del texto (el sistema Word ya incluye su propio encabezado superior).
-- Evita el uso excesivo de negritas (`**`).
-- Los compromisos o acuerdos deben presentarse en lista numerada secuencial (1., 2., 3.).
-- Cierra con bloques limpios y profesionales de firmas con líneas de subrayado (`____________________`).
+2. **Fase 2 (Estructura del Acta de Compromiso)**: Solo cuando el usuario indique su preferencia y proporcione los datos (o pida la plantilla en blanco), redactarás el documento oficial cumpliendo **estrictamente** esta estructura visual y formal basada en los formatos institucionales:
+
+   - Título centrado: 
+     ACTA DE COMPROMISO ESTUDIANTIL
+
+   - Fecha estructurada: 
+     Soledad, _____ de ____________ del 2026 (o con el día/mes/año indicado).
+
+   - Párrafo introductorio formal:
+     Yo, [Nombre del estudiante o línea de subrayado], estudiante del grado [Grado] sección [Sección], prometo solemnemente tener una conducta correcta, responsable, respetuosa, acudir puntualmente a mis horas de clase y cumplir con todas las actividades académicas y de convivencia que me corresponden como estudiante de la Institución Educativa Técnica Sagrado Corazón.
+
+   - Compromisos específicos (derivados del caso analizado en lista numerada 1., 2., 3.).
+
+   - Cláusula de incumplimiento:
+     En caso de no cumplir con los compromisos establecidos, se me aplicarán las sanciones y correctivos correspondientes conforme al Manual de Convivencia institucional.
+
+   - Bloque de Firmas profesional al pie:
+     _____________________________________
+     Firma del Estudiante
+
+     _____________________________________
+     Firma del Acudiente / Representante
+
+     _____________________________________
+     Docente Tutor / Coordinador(a)
 """
 
 WELCOME_MESSAGE = f"""
@@ -472,9 +490,9 @@ for idx, msg in enumerate(st.session_state.messages):
             if HAS_DOCX:
                 docx_bytes = generar_documento_word(msg["content"])
                 st.download_button(
-                    label="📄 Descargar Documento Oficial en Microsoft Word (.docx)",
+                    label="📄 Descargar Acta Oficial en Microsoft Word (.docx)",
                     data=docx_bytes,
-                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.docx",
+                    file_name=f"Acta_Compromiso_SagradoCorazon_{idx}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     key=f"dl_word_{idx}",
                 )
@@ -482,7 +500,7 @@ for idx, msg in enumerate(st.session_state.messages):
                 st.download_button(
                     label="📄 Guardar texto (.txt)",
                     data=msg["content"],
-                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
+                    file_name=f"Acta_Compromiso_SagradoCorazon_{idx}.txt",
                     mime="text/plain",
                     key=f"dl_txt_{idx}",
                 )
@@ -515,7 +533,7 @@ if len(st.session_state.messages) <= 1:
         if st.button("Daño a propiedad institucional"):
             selected_option = "Se reportan daños materiales a los pupitres, paredes u otros bienes de la institución."
 
-user_input = st.chat_input("Escriba aquí los hechos de la situación a evaluar...")
+user_input = st.chat_input("Escriba aquí los hechos de la situación o los datos solicitados...")
 prompt = selected_option or user_input
 
 if prompt:
