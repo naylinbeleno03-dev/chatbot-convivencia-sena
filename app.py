@@ -298,7 +298,7 @@ def generar_documento_word(texto_documento):
         p.paragraph_format.line_spacing = 1.15
 
         linea_upper = linea_limpia.upper()
-        # Detección estricta únicamente para los títulos principales (evita que palabras sueltas como "registro" alteren el cuerpo)
+        # Detección estricta únicamente para los títulos principales (evita desorganización y tamaños distintos en el cuerpo)
         es_titulo_principal = (
             "ACTA DE COMPROMISO ESTUDIANTIL" in linea_upper
             or "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" in linea_upper
@@ -478,7 +478,6 @@ for idx, msg in enumerate(st.session_state.messages):
         st.markdown(texto_limpio_html)
 
         contenido_upper = msg["content"].upper()
-        # Condición estricta: Solo muestra los botones de descarga si es Fase 2 (contiene ambos documentos y NO la pregunta de Fase 1)
         is_document_generated = (
             msg["role"] == "assistant"
             and idx > 0
@@ -574,26 +573,46 @@ if prompt:
                 )
             )
 
-        with st.spinner("Procesando información institucional..."):
-            response = client.models.generate_content(
-                model="gemini-3.6-flash",
-                contents=contents,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT, temperature=0.2
-                ),
-            )
+        max_intentos = 3
+        retraso_inicial = 2
+        response = None
 
-            if response and response.text:
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": response.text}
-                )
-                st.rerun()
+        for intento in range(max_intentos):
+            try:
+                with st.spinner(f"Procesando información institucional (Intento {intento + 1}/{max_intentos})..."):
+                    response = client.models.generate_content(
+                        model="gemini-3.6-flash",
+                        contents=contents,
+                        config=types.GenerateContentConfig(
+                            system_instruction=SYSTEM_PROMPT, temperature=0.2
+                        ),
+                    )
+                    if response and response.text:
+                        break
+            except Exception as api_err:
+                err_str = str(api_err)
+                if ("503" in err_str or "UNAVAILABLE" in err_str or "429" in err_str) and intento < max_intentos - 1:
+                    time.sleep(retraso_inicial)
+                    retraso_inicial *= 2
+                    continue
+                else:
+                    raise api_err
+
+        if response and response.text:
+            st.session_state.messages.append(
+                {"role": "assistant", "content": response.text}
+            )
+            st.rerun()
 
     except Exception as e:
         error_msg = str(e)
         if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
             st.warning(
                 "⚠️ El servicio ha alcanzado el límite de consultas por minuto de la capa gratuita. Por favor, espere 30 a 40 segundos e intente de nuevo."
+            )
+        elif "503" in error_msg or "UNAVAILABLE" in error_msg:
+            st.warning(
+                "⚠️ Los servidores están experimentando alta demanda temporal. Los reintentos automáticos se agotaron, por favor intente nuevamente en un momento."
             )
         else:
             st.error(f"Error de comunicación con el servicio: {e}")
