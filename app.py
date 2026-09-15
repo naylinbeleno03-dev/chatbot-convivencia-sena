@@ -192,11 +192,13 @@ def extraer_solo_documento(texto_contenido: str) -> str:
         return ""
 
     patrones = [
+        r"(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA.*)",
+        r"(REGISTRO EN EL OBSERVADOR.*)",
         r"(ACTA DE COMPROMISO ESTUDIANTIL.*)",
         r"(ACTA DE COMPROMISO.*)",
         r"(MODELO DE CARTA.*)",
         r"(MODELO DE REGISTRO.*)",
-        r"(REGISTRO EN EL OBSERVADOR.*)",
+        r"(REGISTRO EN EL OBSERVADOR ESCOLAR.*)",
         r"(CARTA DE DESCARGOS.*)",
         r"(CITACIÓN A ACUDIENTE.*)",
         r"(5\.\s*MODELO.*)",
@@ -250,7 +252,6 @@ def generar_documento_word(texto_contenido):
                 imagen_encontrada = nombre
                 break
 
-        # Si no se encuentra ningún archivo de escudo en el repositorio, se genera uno temporal para que siempre salga
         if not imagen_encontrada:
             DEFAULT_PNG_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkNP7/DwAEgAJ/W7z8kAAAAABJRU5ErkJggg=="
             imagen_encontrada = "escudo_default_temp.png"
@@ -313,15 +314,15 @@ def generar_documento_word(texto_contenido):
             p.paragraph_format.space_before = Pt(10)
             p.paragraph_format.space_after = Pt(12)
 
-        elif "________________" in linea or "FIRMA" in linea.upper() or "T.I." in linea.upper() or "C.C." in linea.upper():
+        elif "________________" in linea or "FIRMA" in linea.upper() or "T.I." in linea.upper() or "C.C." in linea.upper() or "DOCENTE" in linea.upper():
             p.alignment = WD_ALIGN_PARAGRAPH.LEFT
             run = p.add_run(linea_limpia.replace("**", ""))
             run.font.size = Pt(10)
             run.font.name = "Arial"
             # Negrita únicamente en la etiqueta de la firma
-            run.font.bold = "FIRMA" in linea.upper()
+            run.font.bold = "FIRMA" in linea.upper() or "DOCENTE" in linea.upper()
             run.font.color.rgb = RGBColor(31, 41, 55)
-            if "________________" in linea and "Firma" in linea:
+            if "________________" in linea and ("Firma" in linea or "Docente" in linea):
                 p.paragraph_format.space_before = Pt(20)
                 p.paragraph_format.space_after = Pt(2)
             else:
@@ -390,6 +391,8 @@ with st.sidebar:
         st.session_state.messages = []
         st.rerun()
 
+doc_titulo = "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" if user_role == "Docente / Directivo" else "ACTA DE COMPROMISO ESTUDIANTIL"
+
 SYSTEM_PROMPT = f"""
 Eres el asistente institucional del Sistema Digital de Llamados de Atención y Seguimiento de Convivencia Escolar de la Institución Educativa Técnica Sagrado Corazón de Soledad.
 
@@ -403,28 +406,38 @@ REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
    - Resumen breve de la situación reportada.
    - Clasificación de la falta (Tipo I, II o III según Manual de Convivencia y Ley 1620).
    - Procedimiento institucional, **los derechos del estudiante y sus mecanismos de defensa** (derecho a ser escuchado, presentar descargos, aportar pruebas y contradecir en el marco del Debido Proceso del Artículo 29 de la Constitución Política).
-   - **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere el Acta de Compromiso completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, curso, número de T.I. - Tarjeta de Identidad y la fecha del hecho o documento), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarla manualmente?"
-   *¡IMPORTANTE!* En este primer mensaje **NO** debes redactar ni incluir ningún formato de acta ni documento. Solo analiza y haz la pregunta.
+   - **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere el {'Registro en el Observador de Convivencia' if user_role == 'Docente / Directivo' else 'Acta de Compromiso'} completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, curso, número de T.I. - Tarjeta de Identidad y la fecha del hecho o documento), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarla manualmente?"
+   *¡IMPORTANTE!* En este primer mensaje **NO** debes redactar ni incluir ningún formato de documento. Solo analiza y haz la pregunta.
 
 2. **Fase 2 (Generación del Documento - Únicamente al recibir respuesta del usuario)**: 
    Solo cuando el usuario indique su preferencia y proporcione los datos (o pida la plantilla en blanco), redactarás y generarás el documento oficial cumpliendo **estrictamente** esta estructura visual y formal basada en los formatos institucionales:
 
    - Título centrado: 
-     ACTA DE COMPROMISO ESTUDIANTIL
+     {doc_titulo}
 
    - Fecha estructurada: 
      Soledad, [Fecha proporcionada o líneas de subrayado].
 
    - Párrafo introductorio formal:
-     Yo, [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], estudiante del curso [Curso], en ejercicio de mis derechos y del debido proceso, prometo solemnemente tener una conducta correcta, responsable, respetuosa, acudir puntualmente a mis horas de clase y cumplir con todas las actividades académicas y de convivencia que me corresponden como estudiante de la Institución Educativa Técnica Sagrado Corazón.
+     {'Registro de seguimiento institucional en el observador escolar para el estudiante [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], del curso [Curso]. Se consigna la situación reportada, los descargos y los compromisos pedagógicos en garantía del debido proceso.' if user_role == 'Docente / Directivo' else 'Yo, [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], estudiante del curso [Curso], en ejercicio de mis derechos y del debido proceso, prometo solemnemente tener una conducta correcta, responsable, respetuosa, acudir puntualmente a mis horas de clase y cumplir con todas las actividades académicas y de convivencia que me corresponden como estudiante de la Institución Educativa Técnica Sagrado Corazón.'}
 
-   - Compromisos específicos (derivados del caso analizado en lista numerada 1., 2., 3.).
+   - Compromisos y observaciones específicos (derivados del caso analizado en lista numerada 1., 2., 3.).
 
-   - Cláusula de incumplimiento:
-     En caso de no cumplir con los compromisos establecidos, se me aplicarán las sanciones y correctivos correspondientes conforme al Manual de Convivencia institucional, garantizando en todo momento el derecho de defensa.
+   - Cláusula final:
+     {'En constancia de lo anterior y en aplicación del Manual de Convivencia, se firman las presentes observaciones y seguimiento.' if user_role == 'Docente / Directivo' else 'En caso de no cumplir con los compromisos establecidos, se me aplicarán las sanciones y correctivos correspondientes conforme al Manual de Convivencia institucional, garantizando en todo momento el derecho de defensa.'}
 
    - Bloque de Firmas profesional al pie:
+     {'''_____________________________________
+     Firma del Docente / Directivo Responsable
+     C.C. ________________________________
+
      _____________________________________
+     Firma del Estudiante
+     T.I. ________________________________
+
+     _____________________________________
+     Firma del Acudiente / Representante
+     C.C. ________________________________''' if user_role == 'Docente / Directivo' else '''_____________________________________
      Firma del Estudiante
      T.I. ________________________________
 
@@ -433,7 +446,7 @@ REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
      C.C. ________________________________
 
      _____________________________________
-     Docente Tutor / Coordinador(a)
+     Docente Tutor / Coordinador(a)'''}
 """
 
 WELCOME_MESSAGE = f"""
@@ -460,15 +473,17 @@ for idx, msg in enumerate(st.session_state.messages):
             and idx > 0
             and (
                 "FIRMA DEL ESTUDIANTE" in contenido_upper
+                or "DOCENTE" in contenido_upper
+                or "OBSERVADOR" in contenido_upper
                 or "_____________________________________" in msg["content"]
             )
         ):
             if HAS_DOCX:
                 docx_bytes = generar_documento_word(msg["content"])
                 st.download_button(
-                    label="📄 Descargar Acta Oficial en Microsoft Word (.docx)",
+                    label="📄 Descargar Documento Oficial en Microsoft Word (.docx)",
                     data=docx_bytes,
-                    file_name=f"Acta_Compromiso_SagradoCorazon_{idx}.docx",
+                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     key=f"dl_word_{idx}",
                 )
@@ -476,7 +491,7 @@ for idx, msg in enumerate(st.session_state.messages):
                 st.download_button(
                     label="📄 Guardar texto (.txt)",
                     data=msg["content"],
-                    file_name=f"Acta_Compromiso_SagradoCorazon_{idx}.txt",
+                    file_name=f"Documento_Convivencia_SagradoCorazon_{idx}.txt",
                     mime="text/plain",
                     key=f"dl_txt_{idx}",
                 )
