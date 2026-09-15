@@ -500,14 +500,13 @@ for idx, msg in enumerate(st.session_state.messages):
         st.markdown(msg["content"])
 
         contenido_upper = msg["content"].upper()
+        # Condición estricta: Solo muestra el botón de descarga si el mensaje contiene el bloque de firmas o la estructura final del documento
         if (
             msg["role"] == "assistant"
             and idx > 0
             and (
-                "ACTA" in contenido_upper
-                or "REGISTRO" in contenido_upper
-                or "PLANTILLA" in contenido_upper
-                or "DOCUMENTO" in contenido_upper
+                "FIRMA DEL ESTUDIANTE" in contenido_upper
+                or "_____________________________________" in msg["content"]
             )
         ):
             if HAS_DOCX:
