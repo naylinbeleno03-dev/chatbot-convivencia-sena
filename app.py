@@ -151,6 +151,24 @@ st.markdown(
         border-radius: 6px !important;
     }
 
+    /* Botón de enviar del chat en azul oscuro elegante (evita tonos rojos o rosados) */
+    [data-testid="stChatInput"] button {
+        background-color: #0F172A !important;
+        border-color: #0F172A !important;
+        color: #FFFFFF !important;
+        border-radius: 6px !important;
+    }
+
+    [data-testid="stChatInput"] button:hover {
+        background-color: #D4AF37 !important;
+        border-color: #D4AF37 !important;
+    }
+
+    [data-testid="stChatInput"] button svg {
+        fill: #FFFFFF !important;
+        color: #FFFFFF !important;
+    }
+
     hr {
         border-color: #64748B !important;
     }
@@ -279,12 +297,15 @@ def generar_documento_word(texto_documento):
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
 
-        if (
-            "ACTA" in linea.upper()
-            or "REGISTRO" in linea.upper()
-            or "MODELO" in linea.upper()
+        linea_upper = linea_limpia.upper()
+        # Detección estricta únicamente para los títulos principales (evita que palabras sueltas como "registro" alteren el cuerpo)
+        es_titulo_principal = (
+            "ACTA DE COMPROMISO ESTUDIANTIL" in linea_upper
+            or "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" in linea_upper
             or linea.strip().startswith("#")
-        ):
+        )
+
+        if es_titulo_principal:
             texto_titulo = linea_limpia.replace("#", "").replace("**", "")
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run(texto_titulo)
@@ -295,13 +316,13 @@ def generar_documento_word(texto_documento):
             p.paragraph_format.space_before = Pt(10)
             p.paragraph_format.space_after = Pt(12)
 
-        elif "________________" in linea or "FIRMA" in linea.upper() or "T.I." in linea.upper() or "C.C." in linea.upper() or "DOCENTE" in linea.upper():
+        elif "________________" in linea or "FIRMA" in linea_upper or "T.I." in linea_upper or "C.C." in linea_upper or "DOCENTE" in linea_upper:
             p.alignment = WD_ALIGN_PARAGRAPH.LEFT
             run = p.add_run(linea_limpia.replace("**", ""))
             run.font.size = Pt(10)
             run.font.name = "Arial"
             # Negrita únicamente en la etiqueta de la firma
-            run.font.bold = "FIRMA" in linea.upper() or "DOCENTE" in linea.upper()
+            run.font.bold = "FIRMA" in linea_upper or "DOCENTE" in linea_upper
             run.font.color.rgb = RGBColor(31, 41, 55)
             if "________________" in linea and ("Firma" in linea or "Docente" in linea):
                 p.paragraph_format.space_before = Pt(20)
@@ -313,8 +334,9 @@ def generar_documento_word(texto_documento):
         else:
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
             run = p.add_run(linea_limpia.replace("**", ""))
-            run.font.size = Pt(10)
+            run.font.size = Pt(10)  # Tamaño uniforme y estricto para todo el cuerpo
             run.font.name = "Arial"
+            run.font.bold = False  # Sin negritas innecesarias en el cuerpo del texto
             run.font.color.rgb = RGBColor(31, 41, 55)
 
     buffer = io.BytesIO()
