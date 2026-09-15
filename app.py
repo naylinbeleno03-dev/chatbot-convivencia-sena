@@ -407,7 +407,7 @@ with st.sidebar:
     
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
-            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso)."
+            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso y Derechos Fundamentales)."
         )
         st.markdown(
             f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de Educación."
@@ -422,7 +422,7 @@ with st.sidebar:
             f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Decreto Reglamentario de la Ley 1620."
         )
         st.markdown(
-            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Pacto de Convivencia Institucional."
+            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Manual Institucional."
         )
 
     st.markdown("---")
