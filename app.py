@@ -398,16 +398,25 @@ with st.sidebar:
         "[Abrir Repositorio Digital](https://repositorioconvivencia-k3hz5bcgykhxqwn6gn7cjh.streamlit.app/)"
     )
     
-    with st.expander("Ver Marco Legal e Institucional"):
+   with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
-            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Debido Proceso)."
+            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso)."
         )
-        st.markdown(f"* **[Ley 115 de 1994]({URL_LEY_115})**: Educación.")
-        st.markdown(f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Infancia.")
-        st.markdown(f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Convivencia.")
-        st.markdown(f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Decreto.")
-        st.markdown(f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Manual.")
-
+        st.markdown(
+            f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de Educación."
+        )
+        st.markdown(
+            f"* **[Ley 1098 de 2006]({URL_LEY_1098})**: Código de la Infancia y la Adolescencia."
+        )
+        st.markdown(
+            f"* **[Ley 1620 de 2013]({URL_LEY_1620})**: Sistema Nacional de Convivencia Escolar."
+        )
+        st.markdown(
+            f"* **[Decreto 1965 de 2013]({URL_DECRETO_1965})**: Decreto Reglamentario de la Ley 1620."
+        )
+        st.markdown(
+            f"* **[Manual de Convivencia]({URL_MANUAL_CONVIVENCIA})**: Pacto de Convivencia Institucional."
+        )
     st.markdown("---")
     st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación.")
