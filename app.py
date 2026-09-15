@@ -428,11 +428,11 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación.")
-    st.markdown("2. Elija si desea el acta automática (dando sus datos) o en blanco.")
-    st.markdown("3. Descargue el documento oficial en Word.")
+    st.markdown("2. Responda a la solicitud de datos o elija plantilla en blanco.")
+    st.markdown("3. Descargue el documento oficial en Word generado al final.")
 
     st.markdown("---")
-    if st.button("Reiniciar consulta", use_container_width=True):
+    if st.button("🔄 Reiniciar consulta", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
@@ -444,13 +444,16 @@ Estás orientando a un usuario con el perfil de: {user_role}.
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso y el derecho de defensa del estudiante), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de la Institución Educativa Técnica Sagrado Corazón.
 
 REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
-1. **Fase 1 (Análisis Inicial, Derechos de Defensa y Solicitud de Elección)**: Cuando el usuario ingrese o seleccione un caso, presenta detalladamente:
+1. **Fase 1 (Análisis Inicial, Derechos de Defensa y Solicitud de Datos - NUNCA GENERES EL DOCUMENTO AQUÍ)**: 
+   Cuando el usuario ingrese o seleccione un caso, preséntale ÚNICAMENTE:
    - Resumen breve de la situación reportada.
    - Clasificación de la falta (Tipo I, II o III según Manual de Convivencia y Ley 1620).
    - Procedimiento institucional, **los derechos del estudiante y sus mecanismos de defensa** (derecho a ser escuchado, presentar descargos, aportar pruebas y contradecir en el marco del Debido Proceso del Artículo 29 de la Constitución Política).
    - **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere el Acta de Compromiso completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, curso, número de T.I. - Tarjeta de Identidad y la fecha del hecho o documento), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarla manualmente?"
+   *¡IMPORTANTE!* En este primer mensaje **NO** debes redactar ni incluir ningún formato de acta ni documento. Solo analiza y haz la pregunta.
 
-2. **Fase 2 (Estructura del Acta de Compromiso)**: Solo cuando el usuario indique su preferencia y proporcione los datos (o pida la plantilla en blanco), redactarás el documento oficial cumpliendo **estrictamente** esta estructura visual y formal basada en los formatos institucionales:
+2. **Fase 2 (Generación del Documento - Únicamente al recibir respuesta del usuario)**: 
+   Solo cuando el usuario indique su preferencia y proporcione los datos (o pida la plantilla en blanco), redactarás y generarás el documento oficial cumpliendo **estrictamente** esta estructura visual y formal basada en los formatos institucionales:
 
    - Título centrado: 
      ACTA DE COMPROMISO ESTUDIANTIL
