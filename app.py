@@ -407,7 +407,7 @@ with st.sidebar:
     
     with st.expander("Ver Marco Legal e Institucional"):
         st.markdown(
-            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso y Derechos Fundamentales)."
+            f"* **[Constitución Política]({URL_CONSTITUCION_POLITICA})**: Art. 29 (Garantía del Debido Proceso) y Derechos Fundamentales."
         )
         st.markdown(
             f"* **[Ley 115 de 1994]({URL_LEY_115})**: Ley General de Educación."
