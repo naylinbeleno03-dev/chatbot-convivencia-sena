@@ -228,7 +228,6 @@ def limpiar_texto_para_word(texto: str) -> str:
     """Limpia viñetas de markdown manteniendo intactos los guiones bajos y espacios."""
     if not texto:
         return ""
-    # Eliminar viñetas de markdown al inicio de línea
     texto = re.sub(r"^\s*[\*\-]\s+", "", texto, flags=re.MULTILINE)
     return texto.strip()
 
@@ -277,7 +276,7 @@ def generar_documento_word(texto_contenido):
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-        # Encabezado
+        # Encabezado formal institucional único
         header = section.header
         p_head = header.paragraphs[0]
         p_head.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -325,7 +324,7 @@ def generar_documento_word(texto_contenido):
         r_foot.font.italic = True
         r_foot.font.color.rgb = RGBColor(100, 116, 139)
 
-    # Cuerpo del documento
+    # Cuerpo del documento limpio sin duplicar encabezados ni exceso de negritas
     lineas = texto_documento.split("\n")
     for linea in lineas:
         linea_limpia = limpiar_texto_para_word(linea)
@@ -336,12 +335,12 @@ def generar_documento_word(texto_contenido):
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
 
+        # Detectar si es el título principal del acta
         if (
-            linea.strip().startswith("#")
-            or (linea.strip().startswith("**") and linea.strip().endswith("**"))
-            or "ACTA" in linea.upper()
+            "ACTA" in linea.upper()
             or "REGISTRO" in linea.upper()
             or "MODELO" in linea.upper()
+            or linea.strip().startswith("#")
         ):
             texto_titulo = linea_limpia.replace("#", "").replace("**", "")
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -361,7 +360,7 @@ def generar_documento_word(texto_contenido):
             run.font.bold = "FIRMA" in linea.upper()
             run.font.color.rgb = RGBColor(31, 41, 55)
             if "________________" in linea:
-                p.paragraph_format.space_before = Pt(36)
+                p.paragraph_format.space_before = Pt(30)
                 p.paragraph_format.space_after = Pt(2)
             else:
                 p.paragraph_format.space_before = Pt(2)
@@ -369,17 +368,10 @@ def generar_documento_word(texto_contenido):
 
         else:
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-            partes = re.split(r"(\*\*.*?\*\*)", linea_limpia)
-            for parte in partes:
-                if parte.startswith("**") and parte.endswith("**"):
-                    run = p.add_run(parte[2:-2])
-                    run.bold = True
-                else:
-                    run = p.add_run(parte)
-
-                run.font.size = Pt(10)
-                run.font.name = "Arial"
-                run.font.color.rgb = RGBColor(31, 41, 55)
+            run = p.add_run(linea_limpia.replace("**", ""))
+            run.font.size = Pt(10)
+            run.font.name = "Arial"
+            run.font.color.rgb = RGBColor(31, 41, 55)
 
     buffer = io.BytesIO()
     doc.save(buffer)
@@ -418,7 +410,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("**Guía de consulta:**")
     st.markdown("1. Ingrese los detalles de la situación.")
-    st.markdown("2. Se categorizará el hecho y se redactará el documento.")
+    st.markdown("2. Responda si desea el documento automático o en plantilla en blanco.")
     st.markdown("3. Descargue el documento oficial en Word.")
 
     if st.button("Reiniciar consulta"):
@@ -432,7 +424,7 @@ Estás orientando a un usuario con el perfil de: {user_role}.
 
 Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ante situaciones disciplinarias, asegurando el cumplimiento de la Constitución Política de Colombia (Art. 29 - Debido Proceso), la Ley 115 de 1994, la Ley 1098 de 2006 (Código de Infancia y Adolescencia), la Ley 1620 de 2013, el Decreto 1965 de 2013 y el Manual de Convivencia de la Institución Educativa Técnica Sagrado Corazón.
 
-Estructura de respuesta obligatoria (5 puntos en cada análisis completo):
+Estructura de tu análisis inicial del caso:
 1. Resumen de la situación reportada.
 2. Clasificación de la falta (Según el Manual de Convivencia y Ley 1620 de 2013):
    - Situación Tipo I (Leve)
@@ -440,14 +432,13 @@ Estructura de respuesta obligatoria (5 puntos en cada análisis completo):
    - Situación Tipo III (Gravísima)
 3. Procedimiento institucional aplicable.
 4. Garantías y Debido Proceso (Artículo 29 de la Constitución Política).
-5. Modelo de Documento Digital Sugerido:
-   Inicia esta sección obligatoriamente con el título en mayúsculas (ej. "ACTA DE COMPROMISO Y DESCARGOS ESTUDIANTILES" o "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA ESCOLAR") y genera inmediatamente la plantilla redactada o con líneas de subrayado reales usando guiones bajos (`____________________`).
+5. **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere el documento oficial completando automáticamente los datos de este caso, o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarla manualmente?"
 
-Reglas estrictas de formato para el documento digital:
-- Queda prohibido mencionar que el documento debe ser impreso o firmado en físico.
-- Utiliza siempre líneas con guiones bajos institucionales (`____________________`) para los campos vacíos.
-- Los compromisos o acuerdos deben representarse estrictamente como una lista numerada secuencial (1., 2., 3.).
-- Cierra siempre con el bloque formal de firmas utilizando `____________________`.
+**Reglas estrictas para cuando el usuario responda cómo desea el documento**:
+- No repitas el membrete o nombre del colegio en el cuerpo del texto (el sistema Word ya incluye su propio encabezado superior).
+- Evita el uso excesivo de negritas (`**`).
+- Los compromisos o acuerdos deben presentarse en lista numerada secuencial (1., 2., 3.).
+- Cierra con bloques limpios y profesionales de firmas con líneas de subrayado (`____________________`).
 """
 
 WELCOME_MESSAGE = f"""
