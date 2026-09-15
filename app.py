@@ -468,16 +468,19 @@ for idx, msg in enumerate(st.session_state.messages):
         st.markdown(texto_limpio_html)
 
         contenido_upper = msg["content"].upper()
-        if (
+        # Condición estricta: Solo muestra el botón de descarga si es Fase 2 (contiene el documento final y NO la pregunta de Fase 1)
+        is_document_generated = (
             msg["role"] == "assistant"
             and idx > 0
             and (
-                "FIRMA DEL ESTUDIANTE" in contenido_upper
-                or "DOCENTE" in contenido_upper
-                or "OBSERVADOR" in contenido_upper
-                or "_____________________________________" in msg["content"]
+                "ACTA DE COMPROMISO ESTUDIANTIL" in contenido_upper
+                or "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" in contenido_upper
             )
-        ):
+            and ("FIRMA" in contenido_upper or "_____________________________________" in msg["content"])
+            and "¿DESEA QUE GENERE" not in contenido_upper
+        )
+
+        if is_document_generated:
             if HAS_DOCX:
                 docx_bytes = generar_documento_word(msg["content"])
                 st.download_button(
