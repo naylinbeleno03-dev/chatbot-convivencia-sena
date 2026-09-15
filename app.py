@@ -2,6 +2,7 @@ import io
 import os
 import re
 import time
+import base64
 import streamlit as st
 from google import genai
 from google.genai import types
@@ -42,15 +43,14 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-color: #F3F4F6;
-        color: #1F2937;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #F3F4F6 !important;
+        color: #1F2937 !important;
     }
     
-    /* Barra lateral y todos sus textos y elementos en blanco */
+    /* Barra lateral en azul oscuro elegante */
     section[data-testid="stSidebar"] {
-        background-color: #1E293B;
-        border-right: 1px solid #334155;
+        background-color: #1E293B !important;
+        border-right: 1px solid #334155 !important;
     }
 
     section[data-testid="stSidebar"] h1, 
@@ -99,14 +99,14 @@ st.markdown(
     }
 
     .header-box {
-        background-color: #0F172A;
+        background-color: #0F172A !important;
         padding: 22px;
         border-radius: 12px;
         border-left: 6px solid #D4AF37;
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
         margin-bottom: 24px;
     }
-
+    
     .header-box h1 {
         color: #FFFFFF !important;
         margin: 0 !important;
@@ -114,109 +114,45 @@ st.markdown(
         font-weight: 600 !important;
     }
 
-    .header-box p {
-        color: #E2E8F0 !important;
+    .stMarkdown .header-box p, .header-box p {
+        color: #FFFFFF !important;
         margin-top: 6px !important;
         margin-bottom: 0 !important;
         font-size: 0.95rem !important;
     }
 
-    /* Botón de la barra lateral */
-    section[data-testid="stSidebar"] .stButton>button {
-        background-color: #FFFFFF !important;
-        color: #0F172A !important;
-        border: 1px solid #FFFFFF !important;
-        border-radius: 6px !important;
-        font-weight: 600 !important;
-        transition: all 0.3s ease !important;
-        width: 100%;
-        padding: 8px 12px;
-    }
-
-    section[data-testid="stSidebar"] .stButton>button p,
-    section[data-testid="stSidebar"] .stButton>button span {
-        color: #0F172A !important;
-    }
-
-    section[data-testid="stSidebar"] .stButton>button:hover {
+    .stButton>button {
         background-color: #0F172A !important;
         color: #FFFFFF !important;
-        border-color: #0F172A !important;
-    }
-
-    section[data-testid="stSidebar"] .stButton>button:hover p,
-    section[data-testid="stSidebar"] .stButton>button:hover span {
-        color: #FFFFFF !important;
-    }
-
-    .stMainBlockContainer div.stButton > button {
-        background-color: #FFFFFF !important;
-        color: #0F172A !important;
-        border: 1px solid #CBD5E1 !important;
+        border: 1px solid #0F172A !important;
         border-radius: 8px !important;
-        padding: 10px 14px !important;
-        font-weight: 500 !important;
-        width: 100%;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        font-weight: 600 !important;
+        padding: 8px 16px !important;
     }
 
-    .stMainBlockContainer div.stButton > button:hover {
-        background-color: #0F172A !important;
+    .stButton>button:hover {
+        background-color: #D4AF37 !important;
+        color: #0F172A !important;
+        border-color: #D4AF37 !important;
+    }
+
+    [data-testid="stWidgetLabel"] p, label, .stMarkdown p {
+        color: #1F2937 !important;
+    }
+
+    .stMarkdown .header-box p {
         color: #FFFFFF !important;
-        border-color: #0F172A !important;
     }
 
-    .stTextInput>div>div>input {
+    .stTextInput>div>div>input, .stSelectbox>div>div>div, .stTextArea textarea {
         background-color: #FFFFFF !important;
         color: #000000 !important;
         border: 1px solid #CBD5E1 !important;
         border-radius: 6px !important;
-    }
-
-    [data-testid="stChatMessage"] {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E5E7EB !important;
-        border-left: 5px solid #0F172A !important;
-        border-radius: 10px !important;
-        padding: 16px !important;
-        margin-bottom: 14px !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-    }
-
-    [data-testid="stChatMessage"] p, 
-    [data-testid="stChatMessage"] div,
-    [data-testid="stChatMessage"] span {
-        color: #0F172A !important;
-        font-size: 0.98rem;
-        line-height: 1.6;
-    }
-
-    [data-testid="stChatInput"] {
-        background-color: #FFFFFF !important;
-        border: 2px solid #475569 !important;
-        border-radius: 10px !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-    }
-
-    [data-testid="stChatInput"] textarea {
-        color: #000000 !important;
-        background-color: #FFFFFF !important;
-    }
-
-    [data-testid="stChatInput"] button {
-        background-color: #000000 !important;
-        border-color: #000000 !important;
-        color: #FFFFFF !important;
-        border-radius: 6px !important;
-    }
-
-    [data-testid="stChatInput"] button svg {
-        fill: #FFFFFF !important;
-        color: #FFFFFF !important;
     }
 
     hr {
-        border-color: #475569;
+        border-color: #64748B !important;
     }
     </style>
 """,
@@ -237,11 +173,18 @@ st.markdown(
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
 
+def limpiar_etiquetas_html(texto: str) -> str:
+    if not texto:
+        return ""
+    return re.sub(r'<[^>]*>', '', texto)
+
+
 def limpiar_texto_para_word(texto: str) -> str:
     if not texto:
         return ""
-    texto = re.sub(r"^\s*[\*\-]\s+", "", texto, flags=re.MULTILINE)
-    return texto.strip()
+    texto_sin_html = limpiar_etiquetas_html(texto)
+    texto_limpio = re.sub(r"^\s*[\*\-]\s+", "", texto_sin_html, flags=re.MULTILINE)
+    return texto_limpio.strip()
 
 
 def extraer_solo_documento(texto_contenido: str) -> str:
@@ -307,7 +250,17 @@ def generar_documento_word(texto_contenido):
                 imagen_encontrada = nombre
                 break
 
-        if imagen_encontrada:
+        # Si no se encuentra ningún archivo de escudo en el repositorio, se genera uno temporal para que siempre salga
+        if not imagen_encontrada:
+            DEFAULT_PNG_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkNP7/DwAEgAJ/W7z8kAAAAABJRU5ErkJggg=="
+            imagen_encontrada = "escudo_default_temp.png"
+            try:
+                with open(imagen_encontrada, "wb") as fh:
+                    fh.write(base64.b64decode(DEFAULT_PNG_BASE64))
+            except Exception:
+                imagen_encontrada = None
+
+        if imagen_encontrada and os.path.exists(imagen_encontrada):
             try:
                 r_img = p_head.add_run()
                 r_img.add_picture(imagen_encontrada, width=Inches(0.55))
@@ -353,7 +306,7 @@ def generar_documento_word(texto_contenido):
             texto_titulo = linea_limpia.replace("#", "").replace("**", "")
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run(texto_titulo)
-            run.bold = True
+            run.bold = True  # Negrita únicamente en el título principal
             run.font.size = Pt(12)
             run.font.name = "Arial"
             run.font.color.rgb = RGBColor(15, 23, 42)
@@ -365,7 +318,8 @@ def generar_documento_word(texto_contenido):
             run = p.add_run(linea_limpia.replace("**", ""))
             run.font.size = Pt(10)
             run.font.name = "Arial"
-            run.font.bold = "FIRMA" in linea.upper() or "ESTUDIANTE" in linea.upper()
+            # Negrita únicamente en la etiqueta de la firma
+            run.font.bold = "FIRMA" in linea.upper()
             run.font.color.rgb = RGBColor(31, 41, 55)
             if "________________" in linea and "Firma" in linea:
                 p.paragraph_format.space_before = Pt(20)
@@ -497,10 +451,10 @@ if "messages" not in st.session_state or len(st.session_state.messages) == 0:
 
 for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+        texto_limpio_html = limpiar_etiquetas_html(msg["content"])
+        st.markdown(texto_limpio_html)
 
         contenido_upper = msg["content"].upper()
-        # Condición estricta: Solo muestra el botón de descarga si el mensaje contiene el bloque de firmas o la estructura final del documento
         if (
             msg["role"] == "assistant"
             and idx > 0
