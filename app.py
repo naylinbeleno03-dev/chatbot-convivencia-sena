@@ -590,7 +590,7 @@ if prompt:
             try:
                 with st.spinner(f"Procesando información institucional (Intento {intento + 1}/{max_intentos})..."):
                     response = client.models.generate_content(
-                        model="gemini-3.8-flash",
+                        model="gemini-3.6-flash",
                         contents=contents,
                         config=types.GenerateContentConfig(
                             system_instruction=SYSTEM_PROMPT, temperature=0.2
