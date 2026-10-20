@@ -527,7 +527,7 @@ for idx, msg in enumerate(st.session_state.messages):
         if is_document_generated:
             if HAS_DOCX:
                 st.markdown("---")
-                st.markdown("**📥 Descargar Documentos Oficiales Generados:**")
+                st.markdown("**Descargar Documentos Oficiales Generados:**")
                 col_dl1, col_dl2 = st.columns(2)
                 
                 with col_dl1:
