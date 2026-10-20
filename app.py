@@ -38,13 +38,18 @@ st.set_page_config(
     layout="centered",
 )
 
-# Estilos CSS personalizados y optimizados
+# Estilos CSS personalizados y optimizados (Garantizando visibilidad perfecta en modo claro/oscuro)
 st.markdown(
     """
     <style>
     .stApp {
         background-color: #F3F4F6 !important;
         color: #1F2937 !important;
+    }
+    
+    /* Forzar visibilidad en títulos y textos globales por compatibilidad de tema */
+    h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+        color: #0F172A !important;
     }
     
     /* Barra lateral en azul oscuro elegante */
@@ -151,7 +156,7 @@ st.markdown(
         border-radius: 6px !important;
     }
 
-    /* Botón de enviar del chat en azul oscuro elegante (evita tonos rojos o rosados) */
+    /* Botón de enviar del chat en azul oscuro elegante */
     [data-testid="stChatInput"] button {
         background-color: #0F172A !important;
         border-color: #0F172A !important;
@@ -208,9 +213,12 @@ def limpiar_texto_para_word(texto: str) -> str:
 def extraer_acta(texto_contenido: str) -> str:
     if not texto_contenido:
         return ""
-    match = re.search(r"(ACTA DE COMPROMISO ESTUDIANTIL.*?)(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA|$)", texto_contenido, re.IGNORECASE | re.DOTALL)
+    # Excluir etiquetas de estructura o separadores al extraer el acta
+    match = re.search(r"(ACTA DE COMPROMISO ESTUDIANTIL.*?)(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA|---|$)", texto_contenido, re.IGNORECASE | re.DOTALL)
     if match:
-        return match.group(1).strip()
+        resultado = match.group(1)
+        resultado = re.sub(r"DOCUMENTO\s*1\s*[:\-]*", "", resultado, flags=re.IGNORECASE)
+        return resultado.strip()
     return texto_contenido.strip()
 
 
@@ -219,7 +227,9 @@ def extraer_observador(texto_contenido: str) -> str:
         return ""
     match = re.search(r"(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA.*)", texto_contenido, re.IGNORECASE | re.DOTALL)
     if match:
-        return match.group(1).strip()
+        resultado = match.group(1)
+        resultado = re.sub(r"DOCUMENTO\s*2\s*[:\-]*", "", resultado, flags=re.IGNORECASE)
+        return resultado.strip()
     return ""
 
 
@@ -290,7 +300,8 @@ def generar_documento_word(texto_documento):
     lineas = texto_documento.split("\n")
     for linea in lineas:
         linea_limpia = limpiar_texto_para_word(linea)
-        if not linea_limpia:
+        # Omitir líneas que contengan etiquetas de control del modelo como DOCUMENTO 1 o DOCUMENTO 2
+        if not linea_limpia or re.match(r"^DOCUMENTO\s*[12]", linea_limpia, re.IGNORECASE):
             continue
 
         p = doc.add_paragraph()
@@ -298,7 +309,6 @@ def generar_documento_word(texto_documento):
         p.paragraph_format.line_spacing = 1.15
 
         linea_upper = linea_limpia.upper()
-        # Detección estricta únicamente para los títulos principales (evita desorganización y tamaños distintos en el cuerpo)
         es_titulo_principal = (
             "ACTA DE COMPROMISO ESTUDIANTIL" in linea_upper
             or "REGISTRO EN EL OBSERVADOR DE CONVIVENCIA" in linea_upper
@@ -309,7 +319,7 @@ def generar_documento_word(texto_documento):
             texto_titulo = linea_limpia.replace("#", "").replace("**", "")
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run(texto_titulo)
-            run.bold = True  # Negrita únicamente en el título principal
+            run.bold = True
             run.font.size = Pt(12)
             run.font.name = "Arial"
             run.font.color.rgb = RGBColor(15, 23, 42)
@@ -321,7 +331,6 @@ def generar_documento_word(texto_documento):
             run = p.add_run(linea_limpia.replace("**", ""))
             run.font.size = Pt(10)
             run.font.name = "Arial"
-            # Negrita únicamente en la etiqueta de la firma
             run.font.bold = "FIRMA" in linea_upper or "DOCENTE" in linea_upper
             run.font.color.rgb = RGBColor(31, 41, 55)
             if "________________" in linea and ("Firma" in linea or "Docente" in linea):
@@ -334,9 +343,9 @@ def generar_documento_word(texto_documento):
         else:
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
             run = p.add_run(linea_limpia.replace("**", ""))
-            run.font.size = Pt(10)  # Tamaño uniforme y estricto para todo el cuerpo
+            run.font.size = Pt(10)
             run.font.name = "Arial"
-            run.font.bold = False  # Sin negritas innecesarias en el cuerpo del texto
+            run.font.bold = False
             run.font.color.rgb = RGBColor(31, 41, 55)
 
     buffer = io.BytesIO()
@@ -401,62 +410,62 @@ Tu propósito es asesorar formal y pedagógicamente a la comunidad educativa ant
 
 REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
 1. **Fase 1 (Análisis Inicial, Derechos de Defensa y Solicitud de Datos - NUNCA GENERES LOS DOCUMENTOS AQUÍ)**: 
-   Cuando el usuario ingrese o seleccione un caso, preséntale ÚNICAMENTE:
-   - Resumen breve de la situación reportada.
-   - Clasificación de la falta (Tipo I, II o III según Manual de Convivencia y Ley 1620).
-   - Procedimiento institucional, **los derechos del estudiante y sus mecanismos de defensa** (derecho a ser escuchado, presentar descargos, aportar pruebas y contradecir en el marco del Debido Proceso del Artículo 29 de la Constitución Política).
-   - **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere tanto el Acta de Compromiso como el Registro en el Observador de Convivencia completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, curso, número de T.I. - Tarjeta de Identidad y la fecha del hecho o documento), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarlas manualmente?"
-   *¡IMPORTANTE!* En este primer mensaje **NO** debes redactar ni incluir ningún formato de documento. Solo analiza y haz la pregunta.
+    Cuando el usuario ingrese o seleccione un caso, preséntale ÚNICAMENTE:
+    - Resumen breve de la situación reportada.
+    - Clasificación de la falta (Tipo I, II o III según Manual de Convivencia y Ley 1620).
+    - Procedimiento institucional, **los derechos del estudiante y sus mecanismos de defensa** (derecho a ser escuchado, presentar descargos, aportar pruebas y contradecir en el marco del Debido Proceso del Artículo 29 de la Constitución Política).
+    - **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere tanto el Acta de Compromiso como el Registro en el Observador de Convivencia completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, curso, número de T.I. - Tarjeta de Identidad y la fecha del hecho o documento), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarlas manualmente?"
+    *¡IMPORTANTE!* En este primer mensaje **NO** debes redactar ni incluir ningún formato de documento. Solo analiza y haz la pregunta.
 
 2. **Fase 2 (Generación de los Documentos - Únicamente al recibir respuesta del usuario)**: 
-   Solo cuando el usuario indique su preferencia y proporcione los datos (o pida la plantilla en blanco con líneas de subrayado), redactarás y generarás **ambos documentos oficiales** (primero el Acta de Compromiso y luego el Registro en el Observador de Convivencia) cumpliendo **estrictamente** esta estructura visual y formal basada en los formatos institucionales:
+    Solo cuando el usuario indique su preferencia y proporcione los datos (o pida la plantilla en blanco con líneas de subrayado), redactarás y generarás **ambos documentos oficiales** (primero el Acta de Compromiso y luego el Registro en el Observador de Convivencia) cumpliendo **estrictamente** esta estructura visual y formal basada en los formatos institucionales:
 
-   ---
-   DOCUMENTO 1:
-   - Título centrado: 
-     ACTA DE COMPROMISO ESTUDIANTIL
-   - Fecha estructurada: 
-     Soledad, [Fecha proporcionada o líneas de subrayado].
-   - Párrafo introductorio formal:
-     Yo, [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], estudiante del curso [Curso], en ejercicio de mis derechos y del debido proceso, prometo solemnemente tener una conducta correcta, responsable, respetuosa, acudir puntualmente a mis horas de clase y cumplir con todas las actividades académicas y de convivencia que me corresponden como estudiante de la Institución Educativa Técnica Sagrado Corazón.
-   - Compromisos específicos (derivados del caso analizado en lista numerada 1., 2., 3., o líneas de subrayado).
-   - Cláusula de incumplimiento:
-     En caso de no cumplir con los compromisos establecidos, se me aplicarán las sanciones y correctivos correspondientes conforme al Manual de Convivencia institucional, garantizando en todo momento el derecho de defensa.
-   - Bloque de Firmas profesional al pie:
-     _____________________________________
-     Firma del Estudiante
-     T.I. ________________________________
+    ---
+    DOCUMENTO 1:
+    - Título centrado: 
+      ACTA DE COMPROMISO ESTUDIANTIL
+    - Fecha estructurada: 
+      Soledad, [Fecha proporcionada o líneas de subrayado].
+    - Párrafo introductorio formal:
+      Yo, [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], estudiante del curso [Curso], en ejercicio de mis derechos y del debido proceso, prometo solemnemente tener una conducta correcta, responsable, respetuosa, acudir puntualmente a mis horas de clase y cumplir con todas las actividades académicas y de convivencia que me corresponden como estudiante de la Institución Educativa Técnica Sagrado Corazón.
+    - Compromisos específicos (derivados del caso analizado en lista numerada 1., 2., 3., o líneas de subrayado).
+    - Cláusula de incumplimiento:
+      En caso de no cumplir con los compromisos establecidos, se me aplicarán las sanciones y correctivos correspondientes conforme al Manual de Convivencia institucional, garantizando en todo momento el derecho de defensa.
+    - Bloque de Firmas profesional al pie:
+      _____________________________________
+      Firma del Estudiante
+      T.I. ________________________________
 
-     _____________________________________
-     Firma del Acudiente / Representante
-     C.C. ________________________________
+      _____________________________________
+      Firma del Acudiente / Representante
+      C.C. ________________________________
 
-     _____________________________________
-     Docente Tutor / Coordinador(a)
+      _____________________________________
+      Docente Tutor / Coordinador(a)
 
-   ---
-   DOCUMENTO 2:
-   - Título centrado: 
-     REGISTRO EN EL OBSERVADOR DE CONVIVENCIA
-   - Fecha estructurada: 
-     Soledad, [Fecha proporcionada o líneas de subrayado].
-   - Párrafo introductorio formal:
-     Registro de seguimiento institucional en el observador escolar para el estudiante [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], del curso [Curso]. Se consigna la situación reportada, los descargos y los compromisos pedagógicos en garantía del debido proceso.
-   - Observaciones y compromisos específicos (derivados del caso analizado en lista numerada 1., 2., 3., o líneas de subrayado).
-   - Cláusula final:
-     En constancia de lo anterior y en aplicación del Manual de Convivencia, se firman las presentes observaciones y seguimiento.
-   - Bloque de Firmas profesional al pie:
-     _____________________________________
-     Firma del Docente / Directivo Responsable
-     C.C. ________________________________
+    ---
+    DOCUMENTO 2:
+    - Título centrado: 
+      REGISTRO EN EL OBSERVADOR DE CONVIVENCIA
+    - Fecha estructurada: 
+      Soledad, [Fecha proporcionada o líneas de subrayado].
+    - Párrafo introductorio formal:
+      Registro de seguimiento institucional en el observador escolar para el estudiante [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], del curso [Curso]. Se consigna la situación reportada, los descargos y los compromisos pedagógicos en garantía del debido proceso.
+    - Observaciones y compromisos específicos (derivados del caso analizado en lista numerada 1., 2., 3., o líneas de subrayado).
+    - Cláusula final:
+      En constancia de lo anterior y en aplicación del Manual de Convivencia, se firman las presentes observaciones y seguimiento.
+    - Bloque de Firmas profesional al pie:
+      _____________________________________
+      Firma del Docente / Directivo Responsable
+      C.C. ________________________________
 
-     _____________________________________
-     Firma del Estudiante
-     T.I. ________________________________
+      _____________________________________
+      Firma del Estudiante
+      T.I. ________________________________
 
-     _____________________________________
-     Firma del Acudiente / Representante
-     C.C. ________________________________
+      _____________________________________
+      Firma del Acudiente / Representante
+      C.C. ________________________________
 """
 
 WELCOME_MESSAGE = """
@@ -581,7 +590,7 @@ if prompt:
             try:
                 with st.spinner(f"Procesando información institucional (Intento {intento + 1}/{max_intentos})..."):
                     response = client.models.generate_content(
-                        model="gemini-3.6-flash",
+                        model="gemini-2.5-flash",
                         contents=contents,
                         config=types.GenerateContentConfig(
                             system_instruction=SYSTEM_PROMPT, temperature=0.2
