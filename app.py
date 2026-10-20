@@ -38,7 +38,7 @@ st.set_page_config(
     layout="centered",
 )
 
-# Estilos CSS personalizados y optimizados con corrección completa para modo oscuro
+# Estilos CSS personalizados y optimizados
 st.markdown(
     """
     <style>
@@ -52,7 +52,7 @@ st.markdown(
         color: #0F172A !important;
     }
 
-    /* Corrección estricta para globos de chat en modo oscuro de Streamlit */
+    /* Corrección para globos de chat en modo oscuro */
     [data-testid="stChatMessage"] {
         background-color: #FFFFFF !important;
         color: #1F2937 !important;
@@ -144,7 +144,8 @@ st.markdown(
         font-size: 0.95rem !important;
     }
 
-    .stButton>button {
+    /* Estilos para todos los botones, incluyendo los de descarga (stDownloadButton) */
+    .stButton>button, div[data-testid="stDownloadButton"]>button {
         background-color: #0F172A !important;
         color: #FFFFFF !important;
         border: 1px solid #0F172A !important;
@@ -153,10 +154,20 @@ st.markdown(
         padding: 8px 16px !important;
     }
 
-    .stButton>button:hover {
+    .stButton>button p, div[data-testid="stDownloadButton"]>button p,
+    .stButton>button span, div[data-testid="stDownloadButton"]>button span {
+        color: #FFFFFF !important;
+    }
+
+    .stButton>button:hover, div[data-testid="stDownloadButton"]>button:hover {
         background-color: #D4AF37 !important;
         color: #0F172A !important;
         border-color: #D4AF37 !important;
+    }
+
+    .stButton>button:hover p, div[data-testid="stDownloadButton"]>button:hover p,
+    .stButton>button:hover span, div[data-testid="stDownloadButton"]>button:hover span {
+        color: #0F172A !important;
     }
 
     [data-testid="stWidgetLabel"] p, label, .stMarkdown p {
@@ -174,7 +185,7 @@ st.markdown(
         border-radius: 6px !important;
     }
 
-    /* Botón de enviar del chat en azul oscuro elegante */
+    /* Botón de enviar del chat */
     [data-testid="stChatInput"] button {
         background-color: #0F172A !important;
         border-color: #0F172A !important;
@@ -231,6 +242,7 @@ def limpiar_texto_para_word(texto: str) -> str:
 def extraer_acta(texto_contenido: str) -> str:
     if not texto_contenido:
         return ""
+    # Excluir etiquetas de estructura o separadores al extraer el acta
     match = re.search(r"(ACTA DE COMPROMISO ESTUDIANTIL.*?)(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA|---|$)", texto_contenido, re.IGNORECASE | re.DOTALL)
     if match:
         resultado = match.group(1)
@@ -317,6 +329,7 @@ def generar_documento_word(texto_documento):
     lineas = texto_documento.split("\n")
     for linea in lineas:
         linea_limpia = limpiar_texto_para_word(linea)
+        # Omitir líneas que contengan etiquetas de control del modelo como DOCUMENTO 1 o DOCUMENTO 2
         if not linea_limpia or re.match(r"^DOCUMENTO\s*[12]", linea_limpia, re.IGNORECASE):
             continue
 
@@ -624,7 +637,6 @@ if prompt:
                     raise api_err
 
         if response and response.text:
-            st.session_style = getattr(st, 'session_style', None)
             st.session_state.messages.append(
                 {"role": "assistant", "content": response.text}
             )
