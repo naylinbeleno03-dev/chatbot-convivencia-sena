@@ -144,7 +144,7 @@ st.markdown(
         font-size: 0.95rem !important;
     }
 
-    /* Estilos para todos los botones, incluyendo los de descarga (stDownloadButton) */
+    /* Estilos para todos los botones, incluyendo los de descarga */
     .stButton>button, div[data-testid="stDownloadButton"]>button {
         background-color: #0F172A !important;
         color: #FFFFFF !important;
@@ -242,7 +242,6 @@ def limpiar_texto_para_word(texto: str) -> str:
 def extraer_acta(texto_contenido: str) -> str:
     if not texto_contenido:
         return ""
-    # Excluir etiquetas de estructura o separadores al extraer el acta
     match = re.search(r"(ACTA DE COMPROMISO ESTUDIANTIL.*?)(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA|---|$)", texto_contenido, re.IGNORECASE | re.DOTALL)
     if match:
         resultado = match.group(1)
@@ -329,7 +328,6 @@ def generar_documento_word(texto_documento):
     lineas = texto_documento.split("\n")
     for linea in lineas:
         linea_limpia = limpiar_texto_para_word(linea)
-        # Omitir líneas que contengan etiquetas de control del modelo como DOCUMENTO 1 o DOCUMENTO 2
         if not linea_limpia or re.match(r"^DOCUMENTO\s*[12]", linea_limpia, re.IGNORECASE):
             continue
 
@@ -443,7 +441,7 @@ REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
     - Resumen breve de la situación reportada.
     - Clasificación de la falta (Tipo I, II o III según Manual de Convivencia y Ley 1620).
     - Procedimiento institucional, **los derechos del estudiante y sus mecanismos de defensa** (derecho a ser escuchado, presentar descargos, aportar pruebas y contradecir en el marco del Debido Proceso del Artículo 29 de la Constitución Política).
-    - **Pregunta obligatoria al final**: Pregúntale claramente al usuario: "¿Desea que genere tanto el Acta de Compromiso como el Registro en el Observador de Convivencia completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, curso, número de T.I. - Tarjeta de Identidad y la fecha del hecho o documento), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarlas manualmente?"
+    - **Pregunta obligatoria al final (NUNCA uses títulos como "Paso Siguiente" o similares, intégralo de forma natural en el texto)**: Pregúntale claramente al usuario: "¿Desea que genere tanto el Acta de Compromiso como el Registro en el Observador de Convivencia completando automáticamente los datos de este caso (por favor proporcione: nombre completo del estudiante, curso, número de T.I. - Tarjeta de Identidad y la fecha del hecho o documento), o prefiere una plantilla en blanco con líneas de subrayado (`____________________`) para diligenciarlas manualmente?"
     *¡IMPORTANTE!* En este primer mensaje **NO** debes redactar ni incluir ningún formato de documento. Solo analiza y haz la pregunta.
 
 2. **Fase 2 (Generación de los Documentos - Únicamente al recibir respuesta del usuario)**: 
@@ -482,7 +480,7 @@ REGLAS ESTRICTAS DE INTERACCIÓN Y FLUJO:
       Registro de seguimiento institucional en el observador escolar para el estudiante [Nombre del estudiante o línea de subrayado], identificado(a) con T.I. N° [Número de T.I. o línea], del curso [Curso]. Se consigna la situación reportada, los descargos y los compromisos pedagógicos en garantía del debido proceso.
     - Observaciones y compromisos específicos (derivados del caso analizado en lista numerada 1., 2., 3., o líneas de subrayado).
     - Cláusula final:
-      En constancia de lo anterior y en aplicación del Manual de Convivencia, se firman las presentes observaciones y seguimiento.
+      En constancia de lo anterior y en aplicación del Manual de Convivencia, se firmarán las presentes observaciones y seguimiento.
     - Bloque de Firmas profesional al pie:
       _____________________________________
       Firma del Docente / Directivo Responsable
@@ -527,7 +525,7 @@ for idx, msg in enumerate(st.session_state.messages):
         if is_document_generated:
             if HAS_DOCX:
                 st.markdown("---")
-                st.markdown("**Descargar Documentos Oficiales Generados:**")
+                st.markdown("**📥 Descargar Documentos Oficiales Generados:**")
                 col_dl1, col_dl2 = st.columns(2)
                 
                 with col_dl1:
