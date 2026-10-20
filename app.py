@@ -38,7 +38,7 @@ st.set_page_config(
     layout="centered",
 )
 
-# Estilos CSS personalizados y optimizados (Garantizando visibilidad perfecta en modo claro/oscuro)
+# Estilos CSS personalizados y optimizados con corrección completa para modo oscuro
 st.markdown(
     """
     <style>
@@ -47,9 +47,27 @@ st.markdown(
         color: #1F2937 !important;
     }
     
-    /* Forzar visibilidad en títulos y textos globales por compatibilidad de tema */
+    /* Forzar visibilidad correcta en títulos y textos globales */
     h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
         color: #0F172A !important;
+    }
+
+    /* Corrección estricta para globos de chat en modo oscuro de Streamlit */
+    [data-testid="stChatMessage"] {
+        background-color: #FFFFFF !important;
+        color: #1F2937 !important;
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-bottom: 10px;
+    }
+
+    [data-testid="stChatMessage"] p, 
+    [data-testid="stChatMessage"] span, 
+    [data-testid="stChatMessage"] li, 
+    [data-testid="stChatMessage"] label {
+        color: #1F2937 !important;
     }
     
     /* Barra lateral en azul oscuro elegante */
@@ -213,7 +231,6 @@ def limpiar_texto_para_word(texto: str) -> str:
 def extraer_acta(texto_contenido: str) -> str:
     if not texto_contenido:
         return ""
-    # Excluir etiquetas de estructura o separadores al extraer el acta
     match = re.search(r"(ACTA DE COMPROMISO ESTUDIANTIL.*?)(REGISTRO EN EL OBSERVADOR DE CONVIVENCIA|---|$)", texto_contenido, re.IGNORECASE | re.DOTALL)
     if match:
         resultado = match.group(1)
@@ -300,7 +317,6 @@ def generar_documento_word(texto_documento):
     lineas = texto_documento.split("\n")
     for linea in lineas:
         linea_limpia = limpiar_texto_para_word(linea)
-        # Omitir líneas que contengan etiquetas de control del modelo como DOCUMENTO 1 o DOCUMENTO 2
         if not linea_limpia or re.match(r"^DOCUMENTO\s*[12]", linea_limpia, re.IGNORECASE):
             continue
 
@@ -608,6 +624,7 @@ if prompt:
                     raise api_err
 
         if response and response.text:
+            st.session_style = getattr(st, 'session_style', None)
             st.session_state.messages.append(
                 {"role": "assistant", "content": response.text}
             )
