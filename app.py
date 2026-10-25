@@ -185,6 +185,16 @@ st.markdown(
         border-radius: 6px !important;
     }
 
+    /* Corrección para que el texto digitado en la barra de chat inferior se vea perfectamente en modo oscuro */
+    [data-testid="stChatInput"] textarea {
+        color: #000000 !important;
+        background-color: #FFFFFF !important;
+    }
+
+    [data-testid="stChatInput"] textarea::placeholder {
+        color: #64748B !important;
+    }
+
     /* Botón de enviar del chat */
     [data-testid="stChatInput"] button {
         background-color: #0F172A !important;
